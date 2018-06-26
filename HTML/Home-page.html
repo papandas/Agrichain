@@ -1,0 +1,222 @@
+<html ng-app="ionicApp">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title>Side Menus</title>
+    <link href="https://code.ionicframework.com/1.0.0-beta.6/css/ionic.css" rel="stylesheet">
+    <link href="https://code.ionicframework.com/nightly/css/ionic.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/ac-style.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="https://code.ionicframework.com/1.0.0-beta.6/js/ionic.bundle.js"></script>
+    <script src="https://unpkg.com/ionicons@4.2.0/dist/ionicons.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+  </head>
+ 
+  <body>
+    <div ng-controller="AppController">       
+      <ion-nav-view></ion-nav-view>
+    </div>    
+    <script id="app.html" type="text/ng-template">
+      <ion-side-menus>        
+        <ion-side-menu-content>
+          <ion-nav-bar>
+            <button class="button p0i">
+              <i class="icon icon20">
+                <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                     viewBox="0 0 60 60" style="enable-background:new 0 0 60 60;" xml:space="preserve">
+                    <path d="M41.6,52.3c0.5-0.5,0.5-1.3,0-1.8L21.1,30L41.6,9.5c0.5-0.5,0.5-1.3,0-1.8c-0.5-0.5-1.3-0.5-1.8,0L18.4,29.1
+                    c-0.2,0.2-0.4,0.5-0.4,0.9c0,0.3,0.1,0.6,0.4,0.9l21.4,21.4c0.2,0.2,0.5,0.4,0.9,0.4C41,52.6,41.3,52.5,41.6,52.3z"/>
+                </svg>
+              </i>
+            </button>
+            <h1 class="title "><img src="images/agrichain_header_logo.png" alt=""></h1>    
+          </ion-nav-bar>
+          <ion-nav-view class="midscroller" name="appContent"></ion-nav-view>
+        </ion-side-menu-content>         
+        <ion-side-menu side="left">
+          <ion-content>
+            <ion-cart ng-controller='CartController'></ion-cart>
+          </ion-content>
+        </ion-side-menu>
+      </ion-side-menus>
+    </script>
+    
+    <script id="home.html" type="text/ng-template">
+      <ion-view>
+        <ion-content>
+          <ion-purchase class="dispflex">
+            <div class="callwrap fullcon homescreen">
+              <div class="pagemiddle ">
+                <div class="sectioncontent">
+                  <div class="homeoptions">
+                    <div class="halficon">
+                      <a href="producer-list.html" class="gridicon">
+                        <i class="fab fa-envira"></i>
+                        <span>Produce</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fas fa-people-carry"></i>
+                        <span>Suppliers</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fas fa-university"></i>
+                        <span>Financial Lending Institute</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fas fa-gavel"></i>
+                        <span>Government & Advisories</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fas fa-coins"></i>
+                        <span>Trading/Selling</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fab fa-pagelines"></i>
+                        <span>Farming Tips</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fas fa-book-open"></i>
+                        <span>Knowledge /Advisory</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fab fa-mixcloud"></i>
+                        <span>Weather</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                      </a>
+                    </div>
+                    <div class="halficon">
+                      <a class="gridicon">
+                        <i class="fas fa-list-alt"></i>
+                        <span>Farm Log</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ion-purchase>
+        </ion-content>
+      </ion-view>
+    </script>    
+    <script id="ionCart.html" type="text/ng-template"></script>
+    <script>
+      angular.module('ionicApp', ['ionic'])
+      .controller('AppController', function($scope, $ionicSideMenuDelegate, $ionicActionSheet, $ionicPopup, $timeout) {
+        $scope.showPopup = function() {
+                var alertPopup = $ionicPopup.alert({
+                  title: 'Accept Notifications',
+                  template: 'Comiere find nearest doctors exactly where your "allow" so app can find your location',
+                  buttons: [
+                      {
+                        text: 'Cancel',
+                        role: 'cancel',
+                        handler: () => {
+                          
+                        }
+                      },
+                      {
+                        text: 'Allow',
+                        handler: () => {
+                          
+                        }
+                      }
+                    ]
+                });
+                alertPopup.then(function(res) {
+                  console.log('Thank you for not eating my delicious ice cream cone');
+                });
+              };
+        $scope.showActionsheet = function() {
+            $ionicActionSheet.show({
+              titleText: 'Share',
+              buttons: [
+                { text: '<i class="icon ion-android-mail"></i> Mail' },
+                { text: '<i class="icon ion-ios-list-outline"></i> Add Notes' },
+                { text: '<i class="icon ion-social-whatsapp"></i> Whats App' },
+              ],
+              cancelText: 'Cancel',
+              cancel: function() {
+                console.log('CANCELLED');
+              },
+              buttonClicked: function(index) {
+                console.log('BUTTON CLICKED', index);
+                return true;
+              },
+              destructiveButtonClicked: function() {
+                console.log('DESTRUCT');
+                return true;
+              }
+            });
+          };
+        $scope.toggleLeft = function() {
+          $ionicSideMenuDelegate.toggleLeft();
+        };
+      })
+      .controller("HomeController", function($scope) {
+      })
+      .controller("CartController", function($scope) {
+        
+      })
+      .directive("ionCart", function() {
+        return {
+          restrict : "E",
+          templateUrl : "ionCart.html"
+        }
+      })
+      .config(function($stateProvider, $urlRouterProvider) {
+        $stateProvider
+          .state('app', {
+            url: "/app",
+            abstract: true,
+            templateUrl: "app.html"
+          })
+          .state('app.home', {
+            url: "/home",
+            views: {
+              'appContent' :{
+                templateUrl: "home.html",
+                controller : "HomeController"
+              }
+            }
+          })
+        $urlRouterProvider.otherwise("/app/home");
+      })
+      .directive("ionPurchase", function() {
+        return {
+          restrict : "E"
+        }
+      })
+    </script>
+  </body>
+</html>

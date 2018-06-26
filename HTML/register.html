@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+        <title>Rigister</title>
+        <link href="https://code.ionicframework.com/nightly/css/ionic.css" rel="stylesheet">
+        <script src="https://code.ionicframework.com/nightly/js/ionic.bundle.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+    <body class="ova">
+      <div class="fullcon">
+      <div class="backtologin">
+        <a href="login.html" class="icon ion-ios-arrow-back"></a>SIGN IN
+      </div>
+        <div class="loginform fullcon tc">
+          <div class="list">
+            <div class="iconinput inputitem">
+              <select name="" id="type">
+                <option value="p">Producer</option>
+                <option value="po">Processor</option>
+                <option value="d">Distributor</option>
+                <option value="c">Consumer</option>
+              </select>
+            </div>
+            <div class="iconinput inputitem">
+              <input id="fullname" type="text" placeholder="Full Name"/>
+            </div>
+            <div class="iconinput inputitem">
+              <input id="username" type="text" placeholder="Email"/>
+            </div>
+            <div class="iconinput inputitem">
+              <input id="cell" type="text" placeholder="Cell Number"/>
+            </div>
+            <div class="iconinput inputitem">
+              <input id="password" type="password" placeholder="Password"/>
+            </div>
+            <div class="iconinput inputitem">
+              <input id="confirmPassword" type="password" placeholder="Confirm Password"/>
+            </div>
+            <div class="fullcon loginbtn btncon ps20 tc p0i">
+              <a href="javascript:;" onclick="register();" class="darkamberbtn btn">SIGNUP</a>
+            </div>
+          </div>
+        </div>
+        <div class="or fullcon tc">
+          <span>
+            <b>OR</b>
+          </span>
+        </div>
+        <div class="fullcon tc">
+          <div class="socialsign">
+            <label for="">Sign in with</label>
+            <span class="siginopt">
+              <a class="socialicon facebook" href=""><i class="icon ion-social-facebook"></i></a>
+              <a class="socialicon twitter" href=""><i class="icon ion-social-twitter"></i></a>
+              <a class="socialicon googleplus" href=""><i class="icon ion-social-googleplus"></i></a>
+            </span>
+          </div>
+        </div>
+      </div>
+	  <script>
+		if (!localStorage.getItem('users')) {
+			localStorage.setItem('users', JSON.stringify({
+				'producer@ac.com': {password: 'password', type: 'p'},
+				'consumer@ac.com': {password: 'password', type: 'c'}
+			}));
+		};
+		  
+		function register() {
+			var username = angular.element(document.querySelector('#username')).val();
+			var password = angular.element(document.querySelector('#password')).val();
+			var confirmPassword = angular.element(document.querySelector('#confirmPassword')).val();
+			var fullname = angular.element(document.querySelector('#fullname')).val();
+			var cell = angular.element(document.querySelector('#cell')).val();
+			var type = angular.element(document.querySelector('#type')).val();
+			
+			var users = JSON.parse(localStorage.getItem('users'));
+			users[username] = {
+				password: password,
+				fullname: fullname,
+				cell: cell,
+				type: type
+			};
+			
+			localStorage.setItem('users', JSON.stringify(users));
+			
+			window.location.replace('login.html');
+		}		
+	  </script>
+    </body>
+</html>

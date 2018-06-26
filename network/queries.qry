@@ -1,0 +1,15 @@
+/**  queries for agrichain network
+*/
+
+query selectShipment {
+  description: "Select all Shipment"
+  statement:
+      SELECT org.acme.AgrichainNetwork.Shipment
+}
+
+query selectOrdersByBuyer {
+  description: "Select all orders for a specific buyer"
+  statement:
+      SELECT org.acme.AgrichainNetwork.Shipment
+          WHERE (contract.contractId == _$id)
+}

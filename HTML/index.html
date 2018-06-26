@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Server Running</title>
+</head>
+<body onload="initPage()">
+    <h1>Express Server is running.</h1>
+    <!-- LOGIN BOX -->
+    <div>
+        <table>
+            <th>Log In Table.</th>
+            <tr>
+                <td><input type="email" id="li_username"></td>
+            </tr>
+            <tr>
+                <td><input type="password" id="li_password"></td>
+            </tr>
+            <tr>
+                <td><button id="LoginSubmit" >Log In</button></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- SIGN UP BOX -->
+    <div>
+        <table>
+            <th>Sign Up.</th>
+            <tr>
+                <td>
+                    <select id="registry">
+                        <option value="Producer">Producer</option>
+                        <option value="Distributor">Distributor</option>
+                        <option value="Consumer">Consumer</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="text" id="fullname" placeholder="Full Name"></td>
+            </tr>
+            <tr>
+                <td><input type="email" id="email" placeholder="Email"></td>
+            </tr>
+            <tr>
+                <td><input type="text" id="cell" placeholder="Cell Number"></td>
+            </tr>
+            <tr>
+                <td><input type="password" id="password" placeholder="Password"></td>
+            </tr>
+            <tr>
+                <td><button id="SignUpSubmit" >Sign Up</button></td>
+            </tr>
+        </table>
+    </div>
+
+    <script src="js-utils/jquery-3.1.0.min.js"></script>
+    <script src="js-utils/bootstrap.min.js"></script>
+    <script src="js/js-initiate.js"></script>
+    <script src="js/js-events.js"></script>
+    <link href="CSS/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="CSS/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="CSS/style.css" rel="stylesheet" type="text/css">
+</body>
+</html>
