@@ -28,44 +28,41 @@ var pro_string, dis_string, con_string;
 {
   console.log("Initial Page.")
 
-  memberLoad();
+  SetupLogin();
 
-  let _loginBtn = $('#LoginSubmit');
-  _loginBtn.on('click', function(){
-    console.log($('#li_username').val(), $('#li_password').val());
+  SetupSignUp();
+
+  // LOAD REGISTRY-MEMBERS LIST IN THE FRONT LIST
+
+  
+
+  let _loadRegistry = $('#load_registry');
+  _loadRegistry.on('click', function(){
+    var d_prompts = $.Deferred();
     var options = {};
-    options.email = $('#li_username').val();
-    options.pass = $('#li_password').val();
+    options.registry = $('#load_registry_type').find(':selected').text();
+    $.when($.post('/composer/admin/getMembers', options)).done(function (results)
+    { 
 
-    console.log("message sent to API")
-    console.log("waiting for signin message")
+      console.log(results.result);
 
-    $.when($.post('/composer/admin/signin', options)).done(function (results){ 
+      var _str = '';
+      for (each in results.members){
+          (function(_idx, _arr){
+              console.log(_arr[_idx].email)
+              if (_arr[_idx].email != 'noop@dummy'){
+                  _str +='<option value="'+_arr[_idx].email+'">' +_arr[_idx].email + '</option>';
+              }
+          })(each, results.members)
+      }
+      _str += '</select>';
+      
+      $('#members_list').empty();
+      $('#members_list').append(_str);
 
-      console.log(results);
-
-    })
-  })
-
-
-  let _signupBtn = $('#SignUpSubmit');
-  _signupBtn.on('click', function(){
-
-    var options = {};
-    options.registry = $('#registry').find(':selected').text();
-    options.fullname = $('#fullname').val();
-    options.email = $('#email').val();
-    options.cell = $('#cell').val();
-    //options.pass = '';
-
-    console.log("message sent to API")
-    console.log("waiting for signup message")
-
-    $.when($.post('/composer/admin/signup', options)).done(function (results){ 
-
-      console.log(results);
-
-    })
+      d_prompts.resolve();
+    }).fail(d_prompts.reject);
+    return d_prompts.promise(); 
   })
 
 

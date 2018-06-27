@@ -8,52 +8,151 @@
 </head>
 <body onload="initPage()">
     <h1>Express Server is running.</h1>
-    <!-- LOGIN BOX -->
-    <div>
-        <table>
-            <th>Log In Table.</th>
-            <tr>
-                <td><input type="email" id="li_username"></td>
-            </tr>
-            <tr>
-                <td><input type="password" id="li_password"></td>
-            </tr>
-            <tr>
-                <td><button id="LoginSubmit" >Log In</button></td>
-            </tr>
-        </table>
-    </div>
 
-    <!-- SIGN UP BOX -->
+    <table border="1">
+        <tr>
+            <th>Log In</th>
+            <th>Sign Up</th>
+        </tr>
+        <tr>
+            <td>
+
+                <!-- LOGIN BOX -->
+
+                <div>
+                    <table>
+                        <th>Log In Table.</th>
+                        <tr>
+                            <td><input type="email" id="li_username"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="password" id="li_password"></td>
+                        </tr>
+                        <tr>
+                            <td><button id="LoginSubmit" >Log In</button></td>
+                        </tr>
+                        <tr>
+                            <td><div id="loginReplyMessage"></div></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- LOGIN BOX ENDS -->
+
+            </td>
+            <td>
+
+                <!-- SIGN UP BOX STARTS -->
+
+                <div>
+                    <table>
+                        
+                        <tr>
+                            <td>
+                                <select id="registry">
+                                    <option value="Producer">Producer</option>
+                                    <option value="Distributor">Distributor</option>
+                                    <option value="Consumer">Consumer</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="email" id="email" placeholder="Email"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="fullname" placeholder="Full Name"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="cell" placeholder="Cell Number"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="password" id="su_password" placeholder="Password"></td>
+                        </tr>
+                        <tr>
+                            <td><button id="SignUpSubmit" >Sign Up</button></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- SIGN UP BOX ENDS -->
+
+            </td>
+        </tr>
+    </table>
+
+    <!-- FORM ENDS -->
+
+    <hr/>
+
+    <!-- MEMBERS DISPLAY BOX STARTS -->
+
     <div>
+
         <table>
-            <th>Sign Up.</th>
             <tr>
                 <td>
-                    <select id="registry">
-                        <option value="Producer">Producer</option>
-                        <option value="Distributor">Distributor</option>
-                        <option value="Consumer">Consumer</option>
-                    </select>
+                    <!-- FIRST ROW -->
+
+                    <table>
+                        <tr>
+                            <td>
+                                <select id="load_registry_type">
+                                    <option value="Producer">Producer</option>
+                                    <option value="Distributor">Distributor</option>
+                                    <option value="Consumer">Consumer</option>
+                                </select>
+                            </td>
+
+                            <td>
+                                <button id="load_registry">Load Registry</button>
+                                <button>Refresh Members List</button>
+                            </td>
+
+
+                        </tr>
+                    </table>
+
+                    
+
                 </td>
             </tr>
+
             <tr>
-                <td><input type="text" id="fullname" placeholder="Full Name"></td>
+                <td>
+                    
+
+                    <table>
+                        <tr>
+                            <td>
+                                <select id="members_list">
+                            </td>
+
+                            <td>
+                                <button>Create Assets</button>
+                                <button>Load Assets</button>
+                            </td>
+
+
+                        </tr>
+                    </table>
+
+                </td>
             </tr>
+
             <tr>
-                <td><input type="email" id="email" placeholder="Email"></td>
+                <td>
+                    <!-- THIRD ROW -->
+                    &nbsp;
+
+                </td>
             </tr>
-            <tr>
-                <td><input type="text" id="cell" placeholder="Cell Number"></td>
-            </tr>
-            <tr>
-                <td><input type="password" id="password" placeholder="Password"></td>
-            </tr>
-            <tr>
-                <td><button id="SignUpSubmit" >Sign Up</button></td>
-            </tr>
+
         </table>
+
     </div>
+
+
+    <!-- MEMBERS DISPLAY BOX ENDS -->
 
     <script src="js-utils/jquery-3.1.0.min.js"></script>
     <script src="js-utils/bootstrap.min.js"></script>

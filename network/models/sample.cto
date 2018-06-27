@@ -34,7 +34,8 @@ enum ProductType {
 enum ShipmentStatus {
   o CREATED
   o IN_TRANSIT
-  o ARRIVED
+  o SELLING
+  o SOLD
 }
 
 
