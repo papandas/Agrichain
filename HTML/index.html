@@ -89,6 +89,7 @@
     <div>
 
         <table>
+            <tr><td><div>This will list down all the participant in the network. Only Producer has the permission to create assert in the network. Distributes & Consumers can only update the asste once created. </div></td></tr>
             <tr>
                 <td>
                     <!-- FIRST ROW -->
@@ -105,7 +106,7 @@
 
                             <td>
                                 <button id="load_registry">Load Registry</button>
-                                <button>Refresh Members List</button>
+                                
                             </td>
 
 
@@ -116,6 +117,8 @@
 
                 </td>
             </tr>
+
+            <tr><td><div>Based on the participant selected, you can now either create or update assets in the network.</div></td></tr>
 
             <tr>
                 <td>
@@ -128,8 +131,8 @@
                             </td>
 
                             <td>
-                                <button>Create Assets</button>
-                                <button>Load Assets</button>
+                                <button>Create Assets[NA]</button>
+                                <button id="members_load_assets">Load Assets</button>
                             </td>
 
 
@@ -142,7 +145,30 @@
             <tr>
                 <td>
                     <!-- THIRD ROW -->
-                    &nbsp;
+                    
+                    <table id="addAssetBox">
+                        <tr><td>
+                            <table><tr><td><select id="members_list_2"></td><td><button id="load_distributer_members">Load Distributers</button></td></tr></table>
+                        </td></tr>
+                        <tr><td><input type="text" id="harvestYear" placeholder="Harvest Year"></td></tr>
+                        <tr><td>
+                            <select id="commodity">
+                                <option value="POTATO">POTATO</option>
+                                <option value="APPLES">APPLES</option>
+                                <option value="STRAWBERRY">STRAWBERRY</option>
+                                <option value="BLUEBERRY">BLUEBERRY</option>
+                                <option value="BLUEB">BLUEB</option>
+                                <option value="WHEAT">WHEAT</option>
+                                <option value="OAT">OAT</option>
+                            </select>
+                        </td></tr>
+                        <tr><td><input type="text" id="totalAcer" placeholder="Total Acer"></td></tr>
+                        <tr><td><input type="text" id="averageYield" placeholder="Average Yield"></td></tr>
+                        <tr><td><input type="text" id="estimatedBasic" placeholder="Estimated Basic"></td></tr>
+                        <tr><td><input type="text" id="cropInsuranceCoverage" placeholder="Crop Insurance Coverage"></td></tr>
+                        <tr><td><input type="text" id="productCost" placeholder="Product Cost"></td></tr>  
+                        <tr><td><button id="SaveAssets">Save</button></td></tr>                                                                                   
+                    </table>
 
                 </td>
             </tr>
@@ -150,6 +176,8 @@
         </table>
 
     </div>
+
+    <div id="AllOrderList"></div>
 
 
     <!-- MEMBERS DISPLAY BOX ENDS -->

@@ -13,27 +13,42 @@
  */
 
 
-var shipmentStatus = {
-    Created: {code: 1, text: 'Shipping Created'},
-    IN_TRANSIT: {code: 2, text: 'Shipping in transit'},
-    ARRIVED: {code: 3, text: 'Shipping Arrived'}
-};
-
 /**
  * create an shipping product
- * @param {org.acme.AgrichainNetwork.CreateOrder} product - the product to be shipped
+ * @param {org.acme.AgrichainNetwork.CreateAssets} product - the product to be shipped
  * @transaction
  *   
  *   
  */
 
-function CreateOrder(product) {
-    product.order.shipment = product.shipment;
-    product.order.amount = product.amount;
-    product.order.producer = product.producer;
-    product.order.distributed = product.distributed;
-    product.order.consumer = product.consumer;
-    return getAssetRegistry('org.acme.AgrichainNetwork.Shipment')
+function CreateAssets(product) {
+    product.agriasset.producer = product.producer;
+    product.agriasset.distributor = product.distributor;
+    product.agriasset.created = new Date().toISOString();
+    product.agriasset.status = 'CREATED'
+    return getAssetRegistry('org.acme.AgrichainNetwork.AgriAsset')
+        .then(function (assetRegistry) {
+            return assetRegistry.update(product.agriasset);
+        });
+}
+
+function ReceivedAssets(product) {
+    product.agriasset.producer = product.producer;
+    product.agriasset.distributor = product.distributor;
+    product.agriasset.status = 'IN_TRANSIT'
+    return getAssetRegistry('org.acme.AgrichainNetwork.AgriAsset')
+        .then(function (assetRegistry) {
+            return assetRegistry.update(product.agriasset);
+        });
+}
+
+
+function SellingAssets(product) {
+    product.agriasset.consumer = product.consumer;
+    product.agriasset.distributor = product.distributor;
+    product.order.status = 'SELLING'
+    product.order.distributor = product.distributor;
+    return getAssetRegistry('org.acme.AgrichainNetwork.AgriAsset')
         .then(function (assetRegistry) {
             return assetRegistry.update(product.order);
         });

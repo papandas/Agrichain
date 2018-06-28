@@ -75,7 +75,22 @@ describe('Agriculture Blockchain Network', function () {
             consumer.password = 'password';
             consumer.accountBalance = 0;
 
-            const contract = factory.newResource(NS, 'Contract', contractID);
+            const agriAsset = factory.newResource(NS, 'AgriAsset', contractID);
+            agriAsset.harvestYear = '2018';
+            agriAsset.created = new Date().toISOString();
+            agriAsset.commodity = 'POTATO';
+            agriAsset.status = 'IN_TRANSIT';
+            agriAsset.totalAcer = '100 acer';
+            agriAsset.averageYield = '35';
+            agriAsset.estimatedBasic = 111;
+            agriAsset.cropInsuranceCoverage = 'PAPAN INSURANCE COMPLAY';
+            agriAsset.productCost = 1000;
+            agriAsset.producer = factory.newRelationship(NS, 'Producer', producer.$identifier);
+            agriAsset.distributor = factory.newRelationship(NS, 'Distributor', distributor.$identifier);
+            agriAsset.unitCount = 900
+            agriAsset.unitPrice = 9
+
+            /*const contract = factory.newResource(NS, 'Contract', contractID);
             contract.producer = factory.newRelationship(NS, 'Producer', producer.$identifier);
             contract.distributor = factory.newRelationship(NS, 'Distributor', distributor.$identifier);
             contract.consumer = factory.newRelationship(NS, 'Consumer', consumer.$identifier);
@@ -83,18 +98,18 @@ describe('Agriculture Blockchain Network', function () {
 
 
             const shipment = factory.newResource(NS, 'Shipment', shippingID);
-            shipment.type = 'POTATO';
+            shipment.type = '';
             shipment.status = 'IN_TRANSIT';
             shipment.unitCount = 5000;
-            shipment.contract = factory.newRelationship(NS, 'Contract', contract.$identifier);
+            shipment.contract = factory.newRelationship(NS, 'Contract', contract.$identifier);*/
 
-            return businessNetworkConnection.getAssetRegistry(NS + '.Shipment')
+            return businessNetworkConnection.getAssetRegistry(NS + '.AgriAsset')
             .then((assetRegistry)=>{
-                return assetRegistry.add(shipment)
+                return assetRegistry.add(agriAsset)
                 .then(()=>{
-                    return businessNetworkConnection.getAssetRegistry(NS + '.Contract')
+                    return businessNetworkConnection.getParticipantRegistry(NS + '.Consumer')
                     .then((assetRegistry)=>{
-                        return assetRegistry.add(contract)
+                        return assetRegistry.addAll([consumer])
                         .then(()=>{
                             return businessNetworkConnection.getParticipantRegistry(NS + '.Producer')
                             .then((participantRegistry)=>{
@@ -104,18 +119,13 @@ describe('Agriculture Blockchain Network', function () {
                                     .then((participantRegistry)=>{
                                         return participantRegistry.addAll([distributor])
                                         .then(()=>{
-                                            return businessNetworkConnection.getParticipantRegistry(NS + '.Consumer')
-                                            .then((participantRegistry)=>{
-                                                return participantRegistry.addAll([consumer])
-                                                .then(()=>{
-                                                    return businessNetworkConnection.getAssetRegistry(NS + '.Shipment')
-                                                    .then((assetRegistry)=>{
-                                                        return assetRegistry.get(shippingID)
-                                                        .then((shipment)=>{
-                                                            shipment.$identifier.should.equal(shippingID, 'Has correct shipping id');
-                                                            shipment.type.should.equal('POTATO', 'Has correct producer type.');
-                                                        })
-                                                    })
+                                            return businessNetworkConnection.getAssetRegistry(NS + '.AgriAsset')
+                                            .then((assetRegistry)=>{
+                                                return assetRegistry.get(contractID)
+                                                .then((asset)=>{
+                                                    asset.$identifier.should.equal(contractID, 'Has correct shipping id');
+                                                    asset.commodity.should.equal('POTATO', 'Has correct producer type.');
+                                                    console.log(asset);
                                                 })
                                             })
                                         })

@@ -16,22 +16,22 @@
 namespace org.acme.AgrichainNetwork
 
 /**
- * The type of product being shipped
+ * The type of product being Commodity
  */
-enum ProductType {
+enum CommodityType {
   o POTATO
   o APPLES
   o STRAWBERRY
   o BLUEBERRY
-  o BLUEB 
+  o BLUEB
   o WHEAT
   o OAT
 }
 
 /**
- * The status of a shipment
+ * The status of a Asset Status
  */
-enum ShipmentStatus {
+enum AssetStatus {
   o CREATED
   o IN_TRANSIT
   o SELLING
@@ -67,53 +67,46 @@ participant Distributor extends Business {
  * An Consumer is a type of participant in the network
  */
 participant Consumer extends Business {
+  o Long unitPurchased optional
 }
 
-/**
- * A shipment being tracked as an asset on the ledger
- */
-asset Shipment identified by shipmentId {
-  o String shipmentId
-  o ProductType type
-  o ShipmentStatus status
-  o Long unitCount
-  --> Contract contract
-}
-
-/**
- * Defines a contract between a Producer and a Consumer to ship using
- * a Distributor, paying a set unit price.
- */
-asset Contract identified by contractId {
-  o String contractId
+asset AgriAsset identified by agriAssetId {
+  o String agriAssetId
+  o String created
+  o String harvestYear
+  o CommodityType commodity
+  o AssetStatus status
+  o String totalAcer
+  o String averageYield
+  o String estimatedBasic
+  o String cropInsuranceCoverage
+  o String productCost
   --> Producer producer
   --> Distributor distributor
-  --> Consumer consumer
-  o Double unitPrice
+  --> Consumer[] consumer optional
+  o String unitCount optional
+  o String unitPrice optional
 }
 
 
-/**
- * An abstract transaction that is related to a Shipment
- */
-
-abstract transaction ShipmentTransaction {
-  --> Shipment shipment
+transaction CreateAssets{
+ --> AgriAsset agriasset
+ --> Producer producer
+ --> Distributor distributor
 }
 
-/**
- * A notification that a shipment has been received by the
- * Distributor and that funds should be transferred from the Distributor
- * to the Producer.
- */
-transaction ShipmentReceived extends ShipmentTransaction {
+transaction ReceivedAssets {
+ --> AgriAsset agriasset
+ --> Producer producer
+ --> Distributor distributor
 }
 
-transaction CreateOrder{
-  o Integer amount
-  --> Shipment shipment
-  --> Producer producer
-  --> Distributor distributed
-  --> Consumer consumer
+transaction SellingAssets {
+ --> AgriAsset agriasset
+ --> Consumer consumer
+ --> Distributor distributor
 }
+
+
+
 

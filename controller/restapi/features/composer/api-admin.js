@@ -46,6 +46,163 @@ exports.adminNew = function() {
 };
 
 
+/**
+ * get all orders
+ * @param {express.req} req - the inbound request object from the client
+ *  req.body.id - the id of the buyer making the request
+ *  req.body.email - the user id of the buyer in the identity table making this request
+ *  req.body.secret - the pw of this user.
+ * @param {express.res} res - the outbound response object for communicating back to client
+ * @param {express.next} next - an express service to enable post processing prior to responding to the client
+ * @returns {Array} an array of assets
+ * @function
+ */
+exports.getMyOrders = function (req, res, next) {
+    // connect to the network
+    let method = 'getMyOrders';
+    console.log(method+' req.body.email is: '+req.body.email );
+    let allOrders = new Array();
+    let businessNetworkConnection;
+    //if (svc.m_connection === null) {svc.createMessageSocket();}
+    let ser;
+    let archiveFile = fs.readFileSync(path.join(path.dirname(require.main.filename),'network','dist','agrichain-network.bna'));
+    businessNetworkConnection = new BusinessNetworkConnection();
+    return BusinessNetworkDefinition.fromArchive(archiveFile)
+    .then((bnd) => {
+        ser = bnd.getSerializer();
+
+        //console.log(method+' req.body.email is: '+req.body.email );
+        return businessNetworkConnection.connect(req.body.email)
+        .then(() => {
+            return businessNetworkConnection.query('selectAssets')
+            .then((orders) => {
+                allOrders = new Array();
+                for (let each in orders)
+                    { (function (_idx, _arr)
+                        {
+                        let _jsn = ser.toJSON(_arr[_idx]);
+                        _jsn.id = _arr[_idx].agriAssetId;
+                        allOrders.push(_jsn);
+                    })(each, orders);
+                }
+                res.send({'result': 'success', 'orders': allOrders});
+            })
+            .catch((error) => {console.log('selectOrders failed ', error);
+                res.send({'result': 'failed', 'error': 'selectOrders: '+error.message});
+            });
+        })
+        .catch((error) => {console.log('businessNetwork connect failed ', error);
+            res.send({'result': 'failed', 'error': 'businessNetwork: '+error.message});
+        });
+    })
+    .catch((error) => {console.log('create bnd from archive failed ', error);
+        res.send({'result': 'failed', 'error': 'create bnd from archive: '+error.message});
+    });
+};
+
+
+
+/**
+ * adds an asset to the blockchain
+ * @param {express.req} req - the inbound request object from the client
+ * req.body.producer - string with producer id
+ * req.body.distributor - string with distributor id
+ * req.body.items - array with items for asset
+ * @param {express.res} res - the outbound response object for communicating back to client
+ * @param {express.next} next - an express service to enable post processing prior to responding to the client
+ * @returns {Array} an array of assets
+ * @function
+ */
+exports.addOrder = function (req, res, next) {
+    let method = 'addOrder';
+    console.log(method+' req.body.producer is: '+req.body.producer );
+    let businessNetworkConnection;
+    let factory;
+    let ts = Date.now();
+    let agriAssetId = req.body.producer.replace(/@/, '').replace(/\./, '')+ts;
+    //if (svc.m_connection === null) {svc.createMessageSocket();}
+    businessNetworkConnection = new BusinessNetworkConnection();
+    return businessNetworkConnection.connect(req.body.producer)
+    .then(() => {
+        factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+        let order = factory.newResource(NS, 'AgriAsset', agriAssetId);
+        order.harvestYear = req.body.harvestYear;
+        order.created = req.body.created;
+        order.commodity = req.body.commodity;
+        order.status = req.body.status;
+        order.totalAcer = req.body.totalAcer;
+        order.averageYield = req.body.averageYield;
+        order.estimatedBasic = req.body.estimatedBasic;
+        order.cropInsuranceCoverage = req.body.cropInsuranceCoverage;
+        order.productCost = req.body.productCost;
+        order.producer = factory.newRelationship(NS, 'Producer', req.body.producer);
+        order.distributor = factory.newRelationship(NS, 'Distributor', req.body.distributor);
+        order.unitCount = req.body.unitCount;
+        order.unitPrice = req.body.unitPrice;
+
+        //order = svc.createOrderTemplate(order);///**** */
+        //order.amount = 0;
+        //order.orderNumber = orderNo;
+        //order.buyer = factory.newRelationship(NS, 'Buyer', req.body.producer);
+        //order.seller = factory.newRelationship(NS, 'Seller', req.body.distributor);
+        //order.provider = factory.newRelationship(NS, 'Provider', 'noop@dummy');
+        //order.shipper = factory.newRelationship(NS, 'Shipper', 'noop@dummy');
+        //order.financeCo = factory.newRelationship(NS, 'FinanceCo', financeCoID);
+        //for (let each in req.body.items)
+        //{(function(_idx, _arr)
+        //    {   _arr[_idx].description = _arr[_idx].itemDescription;
+        //    order.items.push(JSON.stringify(_arr[_idx]));
+        //    order.amount += parseInt(_arr[_idx].extendedPrice);
+        //})(each, req.body.items);
+        //}
+        // create the buy transaction
+        const createNew = factory.newTransaction(NS, 'CreateAssets');
+        createNew.agriasset = factory.newRelationship(NS, 'AgriAsset', order.$identifier);
+        createNew.producer = factory.newRelationship(NS, 'Producer', req.body.producer);
+        createNew.distributor = factory.newRelationship(NS, 'Distributor', req.body.distributor);
+        
+        // add the order to the asset registry.
+        return businessNetworkConnection.getAssetRegistry(NS+'.AgriAsset')
+        .then((assetRegistry) => {
+            return assetRegistry.add(order)
+                .then(() => {
+                    return businessNetworkConnection.submitTransaction(createNew)
+                    .then(() => {console.log(' order '+agriAssetId+' successfully added');
+                        res.send({'result': ' order '+agriAssetId+' successfully added'});
+                    })
+                    .catch((error) => {
+                        if (error.message.search('MVCC_READ_CONFLICT') !== -1)
+                            {console.log(agriAssetId+' retrying assetRegistry.add for: '+agriAssetId);
+                            //loadTransaction(createNew, agriAssetId, businessNetworkConnection);
+                        }
+                        else
+                        {console.log(agriAssetId+' submitTransaction failed with text: ',error.message);}
+                    });
+                })
+                .catch((error) => {
+                    if (error.message.search('MVCC_READ_CONFLICT') !== -1)
+                        {console.log(agriAssetId+' retrying assetRegistry.add for: '+agriAssetId);
+                        //loadTransaction(createNew, orderNo, businessNetworkConnection);
+                    }
+                    else
+                    {
+                        console.log(agriAssetId+' assetRegistry.add failed: ',error.message);
+                        res.send({'result': 'failed', 'error':' order '+agriAssetId+' getAssetRegistry failed '+error.message});
+                    }
+                });
+        })
+        .catch((error) => {
+            console.log(orderNo+' getAssetRegistry failed: ',error.message);
+            res.send({'result': 'failed', 'error':' order '+orderNo+' getAssetRegistry failed '+error.message});
+        });
+    })
+    .catch((error) => {
+        console.log(orderNo+' business network connection failed: text',error.message);
+        res.send({'result': 'failed', 'error':' order '+orderNo+' add failed on on business network connection '+error.message});
+    });
+};
+
+
 
 /**
  * retrieve array of members from specified registry type

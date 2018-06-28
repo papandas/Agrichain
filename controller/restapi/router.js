@@ -43,7 +43,10 @@ router.use(function(req, res, next) {
 
 router.get('/composer/admin/getCreds*', Admin.getCreds);
 
+router.post('/composer/admin/getMyOrders*', Admin.getMyOrders);
+router.post('/composer/admin/addOrder*', Admin.addOrder);
+
 router.post('/composer/admin/getMembers*', Admin.getMembers);
 
 router.post('/composer/admin/signin*', Admin.SignIn);
-router.post('/composer/admin/signup', Admin.SignUp);
+router.post('/composer/admin/signup*', Admin.SignUp);

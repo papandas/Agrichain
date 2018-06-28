@@ -79,22 +79,22 @@ function _getMembers(_members)
 function SetupLogin(){
     let _loginBtn = $('#LoginSubmit');
   _loginBtn.on('click', function(){
-    console.log($('#li_username').val(), $('#li_password').val());
+    //console.log($('#li_username').val(), $('#li_password').val());
     var options = {};
     options.email = $('#li_username').val();
     options.pass = $('#li_password').val();
 
-    console.log("message sent to API")
+    $('#loginReplyMessage').empty()
     console.log("waiting for signin message")
 
     $.when($.post('/composer/admin/signin', options)).done(function (results){ 
 
-      console.log(results);
+      console.log(results.result);
       $('loginReplyMessage').empty();
-      if(results.result == "success"){
-        $('loginReplyMessage').append(results.members.email + ' is a ' + results.members.registry );
+      if(results.result === 'success'){
+        $('#loginReplyMessage').append(results.members.fullname + ' is a ' + results.members.registry );
       }else{
-        $('loginReplyMessage').append(results);
+        $('#loginReplyMessage').append(results.result);
       }
       
 
@@ -123,4 +123,82 @@ function SetupSignUp(){
         })
     })
 
+}
+
+
+function LoadMemberToCreateAssets(){
+    let _loadRegistry = $('#load_registry');
+    _loadRegistry.on('click', function(){
+        var d_prompts = $.Deferred();
+        var options = {};
+        options.registry = $('#load_registry_type').find(':selected').text();
+
+        $('#addAssetBox').hide();
+
+        switch(options.registry){
+            case 'Producer':
+                $('#addAssetBox').show();
+                break;
+            case 'Distributor':
+                break;
+            case 'Consumer':
+                break;
+            default:
+        }
+
+        $.when($.post('/composer/admin/getMembers', options)).done(function (results)
+        { 
+
+        //console.log(results.result);
+
+        var _str = '';
+        for (each in results.members){
+            (function(_idx, _arr){
+                //console.log(_arr[_idx].email)
+                if (_arr[_idx].email != 'noop@dummy'){
+                    _str +='<option value="'+_arr[_idx].email+'">' +_arr[_idx].email + '</option>';
+                }
+            })(each, results.members)
+        }
+        _str += '</select>';
+        
+        $('#members_list').empty();
+        $('#members_list').append(_str);
+
+        d_prompts.resolve();
+        }).fail(d_prompts.reject);
+        return d_prompts.promise(); 
+    });
+}
+
+
+function LoadMemberDistributersForForm(){
+    let _loadRegistry = $('#load_distributer_members');
+    _loadRegistry.on('click', function(){
+        var d_prompts = $.Deferred();
+        var options = {};
+        options.registry = 'Distributor';
+        $.when($.post('/composer/admin/getMembers', options)).done(function (results)
+        { 
+
+        //console.log(results.result);
+
+        var _str = '';
+        for (each in results.members){
+            (function(_idx, _arr){
+                //console.log(_arr[_idx].email)
+                if (_arr[_idx].email != 'noop@dummy'){
+                    _str +='<option value="'+_arr[_idx].email+'">' +_arr[_idx].email + '</option>';
+                }
+            })(each, results.members)
+        }
+        _str += '</select>';
+        
+        $('#members_list_2').empty();
+        $('#members_list_2').append(_str);
+
+        d_prompts.resolve();
+        }).fail(d_prompts.reject);
+        return d_prompts.promise(); 
+    });
 }
