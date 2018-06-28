@@ -45,6 +45,7 @@ router.get('/composer/admin/getCreds*', Admin.getCreds);
 
 router.post('/composer/admin/getMyOrders*', Admin.getMyOrders);
 router.post('/composer/admin/addOrder*', Admin.addOrder);
+router.post('/composer/admin/orderAction*', Admin.orderAction);
 
 router.post('/composer/admin/getMembers*', Admin.getMembers);
 

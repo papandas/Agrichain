@@ -140,22 +140,7 @@ exports.addOrder = function (req, res, next) {
         order.unitCount = req.body.unitCount;
         order.unitPrice = req.body.unitPrice;
 
-        //order = svc.createOrderTemplate(order);///**** */
-        //order.amount = 0;
-        //order.orderNumber = orderNo;
-        //order.buyer = factory.newRelationship(NS, 'Buyer', req.body.producer);
-        //order.seller = factory.newRelationship(NS, 'Seller', req.body.distributor);
-        //order.provider = factory.newRelationship(NS, 'Provider', 'noop@dummy');
-        //order.shipper = factory.newRelationship(NS, 'Shipper', 'noop@dummy');
-        //order.financeCo = factory.newRelationship(NS, 'FinanceCo', financeCoID);
-        //for (let each in req.body.items)
-        //{(function(_idx, _arr)
-        //    {   _arr[_idx].description = _arr[_idx].itemDescription;
-        //    order.items.push(JSON.stringify(_arr[_idx]));
-        //    order.amount += parseInt(_arr[_idx].extendedPrice);
-        //})(each, req.body.items);
-        //}
-        // create the buy transaction
+        
         const createNew = factory.newTransaction(NS, 'CreateAssets');
         createNew.agriasset = factory.newRelationship(NS, 'AgriAsset', order.$identifier);
         createNew.producer = factory.newRelationship(NS, 'Producer', req.body.producer);
@@ -199,6 +184,80 @@ exports.addOrder = function (req, res, next) {
     .catch((error) => {
         console.log(orderNo+' business network connection failed: text',error.message);
         res.send({'result': 'failed', 'error':' order '+orderNo+' add failed on on business network connection '+error.message});
+    });
+};
+
+
+
+/**
+ * orderAction - act on an order 
+ * @param {express.req} req - the inbound request object from the client
+ * req.body.action - string with 
+ * @param {express.res} res - the outbound response object for communicating back to client
+ * @param {express.next} next - an express service to enable post processing prior to responding to the client
+ * @returns {Array} an array of assets
+ * @function
+ */
+exports.orderAction = function (req, res, next) {
+    let method = 'orderAction';
+    console.log(method+' req.body.participant is: '+req.body.participant );
+    
+    
+    let businessNetworkConnection;
+    let updateOrder;
+    businessNetworkConnection = new BusinessNetworkConnection();
+    
+    return businessNetworkConnection.connect(req.body.participant)
+    .then(() => {
+        return businessNetworkConnection.getAssetRegistry(NS+'.AgriAsset')
+        .then((assetRegistry) => {
+            return assetRegistry.get(req.body.agriAssetId)
+            .then((order) => {
+
+                let factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+
+                console.log(order.status)
+            
+                updateOrder = order;
+                switch (req.body.action)
+                {
+                    case 'SELLING':
+                        updateOrder.status = req.body.action;
+                        break;
+                    case 'SELL':
+                        const consumer = factory.newRelationship(NS, 'Consumer', req.body.participant);
+                        consumer.unitPurchased = parseInt(req.body.unitPurchased);
+
+                        if (updateOrder.consumer) {
+                            updateOrder.consumer.push(consumer);
+                        } else {
+                            updateOrder.consumer = [consumer];
+                        }
+                        break;
+                }
+
+                return businessNetworkConnection.getAssetRegistry(NS+'.AgriAsset')
+                .then((assetRegistry) => {
+                    return assetRegistry.update(updateOrder)
+                    .then(()=>{
+                        console.log("Updated")
+                    })
+                })
+
+                
+
+            })
+            .catch((error) => {
+                console.log('Registry Get Order failed: '+error.message);
+                res.send({'result': 'failed', 'error': 'Registry Get Order failed: '+error.message});
+            });
+        })
+        .catch((error) => {console.log('Get Asset Registry failed: '+error.message);
+            res.send({'result': 'failed', 'error': 'Get Asset Registry failed: '+error.message});
+        });
+    })
+    .catch((error) => {console.log('Business Network Connect failed: '+error.message);
+        res.send({'result': 'failed', 'error': 'Get Asset Registry failed: '+error.message});
     });
 };
 

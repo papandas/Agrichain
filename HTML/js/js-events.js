@@ -129,11 +129,15 @@ function SetupSignUp(){
 function LoadMemberToCreateAssets(){
     let _loadRegistry = $('#load_registry');
     _loadRegistry.on('click', function(){
+        // Empty the order display list
+        $('#AllOrderList').empty();
+
         var d_prompts = $.Deferred();
         var options = {};
         options.registry = $('#load_registry_type').find(':selected').text();
 
         $('#addAssetBox').hide();
+        $('#consumerBuyBox').hide();
 
         switch(options.registry){
             case 'Producer':
@@ -142,6 +146,8 @@ function LoadMemberToCreateAssets(){
             case 'Distributor':
                 break;
             case 'Consumer':
+                $('#consumerBuyBox').show();
+                LoadDistributersOnly()
                 break;
             default:
         }
@@ -201,4 +207,37 @@ function LoadMemberDistributersForForm(){
         }).fail(d_prompts.reject);
         return d_prompts.promise(); 
     });
+}
+
+
+function LoadDistributersOnly(){
+
+    var d_prompts = $.Deferred();
+    var options = {};
+    options.registry = 'Distributor';   
+
+    $.when($.post('/composer/admin/getMembers', options)).done(function (results)
+    { 
+
+        var _str = '';
+        for (each in results.members){
+            (function(_idx, _arr){
+                //console.log(_arr[_idx].email)
+                if (_arr[_idx].email != 'noop@dummy'){
+                    _str +='<option value="'+_arr[_idx].email+'">' +_arr[_idx].email + '</option>';
+                }
+            })(each, results.members)
+        }
+        _str += '</select>';
+        
+        $('#members_list_3').empty();
+        $('#members_list_3').append(_str);
+
+        d_prompts.resolve();
+
+    }).fail(d_prompts.reject);
+
+    return d_prompts.promise(); 
+    //});
+
 }

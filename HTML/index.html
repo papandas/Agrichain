@@ -131,7 +131,6 @@
                             </td>
 
                             <td>
-                                <button>Create Assets[NA]</button>
                                 <button id="members_load_assets">Load Assets</button>
                             </td>
 
@@ -147,6 +146,7 @@
                     <!-- THIRD ROW -->
                     
                     <table id="addAssetBox">
+                        <tr><td><span style="color: green;">Assert Input Form: Load the Distributers list first</span></td></tr>
                         <tr><td>
                             <table><tr><td><select id="members_list_2"></td><td><button id="load_distributer_members">Load Distributers</button></td></tr></table>
                         </td></tr>
@@ -168,6 +168,17 @@
                         <tr><td><input type="text" id="cropInsuranceCoverage" placeholder="Crop Insurance Coverage"></td></tr>
                         <tr><td><input type="text" id="productCost" placeholder="Product Cost"></td></tr>  
                         <tr><td><button id="SaveAssets">Save</button></td></tr>                                                                                   
+                    </table>
+
+                    <table id="consumerBuyBox">
+                        <tr><td><span style="color: green;">Consumer Buy Form: Wait to load Distributers list first and then select the distributer</span></td></tr>
+                        <tr><td>
+                                <table><tr>
+                                    <td><select id="members_list_3"></td>
+                                    
+                                    <td><button id="loadAssetFromDistributer">Load Assets from Distributes</button></td>
+                                </tr></table>
+                        </td></tr>
                     </table>
 
                 </td>

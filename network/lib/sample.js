@@ -35,11 +35,11 @@ function CreateAssets(product) {
 function ReceivedAssets(product) {
     product.agriasset.producer = product.producer;
     product.agriasset.distributor = product.distributor;
-    product.agriasset.status = 'IN_TRANSIT'
+    //product.agriasset.status = 'SELLING'
     return getAssetRegistry('org.acme.AgrichainNetwork.AgriAsset')
-        .then(function (assetRegistry) {
-            return assetRegistry.update(product.agriasset);
-        });
+    .then(function (assetRegistry) {
+        return assetRegistry.update(product.agriasset);
+    });
 }
 
 

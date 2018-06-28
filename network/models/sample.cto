@@ -97,8 +97,8 @@ transaction CreateAssets{
 
 transaction ReceivedAssets {
  --> AgriAsset agriasset
- --> Producer producer
- --> Distributor distributor
+ //--> Producer producer
+ //--> Distributor distributor
 }
 
 transaction SellingAssets {
