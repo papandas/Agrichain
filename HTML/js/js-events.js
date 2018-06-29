@@ -37,16 +37,17 @@ function memberLoad(){
   $.when($.post('/composer/admin/getMembers', options2), $.post('/composer/admin/getMembers', options3),
       $.post('/composer/admin/getMembers', options)).done(function (_producer, _distributor, _consumer)
     { 
-      //console.log("[GetMembers]", _producer, _distributor, _consumer);
       
-      producer = _producer[0].members;
+     console.log("[GetMembers]", _producer, _distributor, _consumer);
+      
+      /*producer = _producer[0].members;
       pro_string = _getMembers(producer);
 
       distributor = _distributor[0].members
       dis_string = _getMembers(distributor);
 
       consumer = _consumer[0].members
-      con_string = _getMembers(consumer);
+      con_string = _getMembers(consumer);*/
 
       d_prompts.resolve();
 

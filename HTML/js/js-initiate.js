@@ -35,6 +35,8 @@ var pro_string, dis_string, con_string;
 
   SetupSignUp();
 
+  //memberLoad();
+
   // LOAD REGISTRY-MEMBERS LIST IN THE FRONT LIST
 
   LoadMemberToCreateAssets()
@@ -196,36 +198,37 @@ var pro_string, dis_string, con_string;
               
 
             }else if(isDistributer == true){
-              
-              if(options.email == (arr[idx].distributor).split('#')[1]){
-                
-                str += '<ul>'
-                
-                str += '<li>Asset Id: ' + arr[idx].agriAssetId;            ;
-                str += '</li><li>Created On: ' + arr[idx].created;
-                str += '</li><li>Status: ' + arr[idx].status;
-                str += '</li><li>Harvest Year: ' + arr[idx].harvestYear;
-                str += '</li><li>Commodity: ' + arr[idx].commodity;
-                str += '</li><li>Total Acer: ' + arr[idx].totalAcer;
-                str += '</li><li>Average Yield: ' + arr[idx].averageYield;
-                str += '</li><li>Estimated Basic: ' + arr[idx].estimatedBasic;
-                str += '</li><li>Crop Insurance Coverage: ' + arr[idx].cropInsuranceCoverage;
-                str += '</li><li>Product Cost: ' + arr[idx].productCost;
-                str += '</li><li>Producer: ' + (arr[idx].producer).split('#')[1];
-                if(arr[idx].distributor){
-                  str += '</li><li>Distributor: ' + (arr[idx].distributor).split('#')[1];
-                }
-                if(arr[idx].consumer){
-                  for (let each in arr[idx].consumer){
-                    (function (_idx, _arr){
-                      str += '</li><li>Customer: ' + (_arr[_idx]).split('#')[1];
-                    })(each, arr[idx].consumer)
+              if(arr[idx].distributor){
+                if(options.email == (arr[idx].distributor).split('#')[1]){
+                  
+                  str += '<ul>'
+                  
+                  str += '<li>Asset Id: ' + arr[idx].agriAssetId;            ;
+                  str += '</li><li>Created On: ' + arr[idx].created;
+                  str += '</li><li>Status: ' + arr[idx].status;
+                  str += '</li><li>Harvest Year: ' + arr[idx].harvestYear;
+                  str += '</li><li>Commodity: ' + arr[idx].commodity;
+                  str += '</li><li>Total Acer: ' + arr[idx].totalAcer;
+                  str += '</li><li>Average Yield: ' + arr[idx].averageYield;
+                  str += '</li><li>Estimated Basic: ' + arr[idx].estimatedBasic;
+                  str += '</li><li>Crop Insurance Coverage: ' + arr[idx].cropInsuranceCoverage;
+                  str += '</li><li>Product Cost: ' + arr[idx].productCost;
+                  str += '</li><li>Producer: ' + (arr[idx].producer).split('#')[1];
+                  
+                    str += '</li><li>Distributor: ' + (arr[idx].distributor).split('#')[1];
+                  
+                  if(arr[idx].consumer){
+                    for (let each in arr[idx].consumer){
+                      (function (_idx, _arr){
+                        str += '</li><li>Customer: ' + (_arr[_idx]).split('#')[1];
+                      })(each, arr[idx].consumer)
+                    }
                   }
-                }
-                //str += '</li><li>Unit Count: ' + arr[idx].unitCount;
-                //str += '</li><li>Unit Price: ' + arr[idx].unitPrice;
-                str += '</li></ul><hr/>'
+                  //str += '</li><li>Unit Count: ' + arr[idx].unitCount;
+                  //str += '</li><li>Unit Price: ' + arr[idx].unitPrice;
+                  str += '</li></ul><hr/>'
 
+                }
               }
             }else if(isConsumer == true){
               
