@@ -11,14 +11,12 @@ query selectAssetsByProducer {
   description: "Select all assets for a specific Producer"
   statement:
       SELECT org.acme.AgrichainNetwork.AgriAsset
-          WHERE (producer.email == _$id)
+          WHERE (producer == _$email)
 }
 
 query selectAssetsByDistributor {
   description: "Select all assets for a specific Distributor"
   statement:
       SELECT org.acme.AgrichainNetwork.AgriAsset
-          WHERE (distributor.email == _$id)
+          WHERE (distributor == _$email)
 }
-
-

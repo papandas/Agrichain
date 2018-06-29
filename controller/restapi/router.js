@@ -44,6 +44,7 @@ router.use(function(req, res, next) {
 router.get('/composer/admin/getCreds*', Admin.getCreds);
 
 router.post('/composer/admin/getMyAssets*', Admin.getMyAssets);
+router.post('/composer/admin/getAssetsByParticipant*', Admin.getAssetsByParticipant);
 router.post('/composer/admin/addAssets*', Admin.addAssets);
 router.post('/composer/admin/assetsAction*', Admin.assetsAction);
 

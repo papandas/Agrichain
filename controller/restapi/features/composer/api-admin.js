@@ -64,12 +64,13 @@ exports.getMyAssets = function (req, res, next) {
     let allOrders = new Array();
     let businessNetworkConnection;
     //if (svc.m_connection === null) {svc.createMessageSocket();}
-    let ser;
+    let serializer;
+    let factory;
     let archiveFile = fs.readFileSync(path.join(path.dirname(require.main.filename),'network','dist','agrichain-network.bna'));
     businessNetworkConnection = new BusinessNetworkConnection();
     return BusinessNetworkDefinition.fromArchive(archiveFile)
     .then((bnd) => {
-        ser = bnd.getSerializer();
+        serializer = bnd.getSerializer();
 
         //console.log(method+' req.body.email is: '+req.body.email );
         return businessNetworkConnection.connect(req.body.email)
@@ -78,22 +79,8 @@ exports.getMyAssets = function (req, res, next) {
             .then((orders) => {
                 allOrders = new Array();
                 for (let each in orders)
-                    { (function (_idx, _arr){
-                            /*switch(req.body.registry){
-                                case 'Producer':
-                                    if(){
-
-                                    }
-                                    break;
-                                case 'Distributor':
-                                    break;
-                                case 'Consumer':
-                                    break;
-                            }
-                            console.log(ser.toJSON(_arr[_idx]));
-                            console.log("=============================");*/
-                            
-                        let _jsn = ser.toJSON(_arr[_idx]);
+                    { (function (_idx, _arr){    
+                        let _jsn = serializer.toJSON(_arr[_idx]);
                         _jsn.id = _arr[_idx].agriAssetId;
                         allOrders.push(_jsn);
                     })(each, orders);
@@ -109,6 +96,80 @@ exports.getMyAssets = function (req, res, next) {
         });
     })
     .catch((error) => {console.log('create bnd from archive failed ', error);
+        res.send({'result': 'failed', 'error': 'create bnd from archive: '+error.message});
+    });
+};
+
+
+/**
+ * get all assets
+ * @param {express.req} req - the inbound request object from the client
+ *  req.body.id - the id of the buyer making the request
+ *  req.body.email - the user id of the buyer in the identity table making this request
+ *  req.body.registry - the pw of this user.
+ * @param {express.res} res - the outbound response object for communicating back to client
+ * @param {express.next} next - an express service to enable post processing prior to responding to the client
+ * @returns {Array} an array of assets
+ * @function
+ */
+exports.getAssetsByParticipant = function (req, res, next) {
+    // connect to the network
+    let method = 'getAssetsByParticipant';
+    console.log(method+' req.body.email is: '+req.body.email );
+    let allOrders = new Array();
+    let businessNetworkConnection;
+    //if (svc.m_connection === null) {svc.createMessageSocket();}
+    let serializer;
+    let factory;
+    let archiveFile = fs.readFileSync(path.join(path.dirname(require.main.filename),'network','dist','agrichain-network.bna'));
+    businessNetworkConnection = new BusinessNetworkConnection();
+    return BusinessNetworkDefinition.fromArchive(archiveFile)
+    .then((bnd) => {
+        serializer = bnd.getSerializer();
+
+        console.log(method+' req.body.email is: '+req.body.email);
+        //config.composer.adminCard
+        return businessNetworkConnection.connect(req.body.email)
+        .then(() => {
+            
+            factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+            const participant = factory.newRelationship(NS, req.body.registry, req.body.email);
+            console.log('resource:' + participant.$namespace + '.' + participant.$type + '#'+ participant.$identifier);
+            
+            const data = 'resource:' + participant.$namespace + '.' + participant.$type + '#'+ participant.$identifier;
+            const email = 'email';
+
+            let queryStr = '';
+            if(req.body.registry == 'Producer'){
+                queryStr = 'selectAssetsByProducer';
+            }else{
+                queryStr = 'selectAssetsByDistributor';
+            }
+
+            console.log(queryStr)
+
+            return businessNetworkConnection.query(queryStr,{email:data} ) 
+            .then((orders)=>{
+                //console.log(orders);
+                allOrders = new Array();
+                for (let each in orders){
+                    (function (_idx, _arr){
+                        let _jsn = serializer.toJSON(_arr[_idx]);
+                        _jsn.id = _arr[_idx].agriAssetId;
+                        allOrders.push(_jsn);
+                    })(each, orders);
+                }
+                res.send({'result': 'success', 'orders': allOrders});
+            }).catch((error)=>{
+                console.log('error while query : ', error)
+                res.send({'result': 'failed', 'error': 'query not found: '+error.message});
+            })
+
+        }).catch((error)=>{
+            console.log('Business Network Count not be connected: ', error)
+            res.send({'result': 'failed', 'error': 'business network can not be connected: '+error.message});
+        })
+    }).catch((error) => {console.log('create bnd from archive failed ', error);
         res.send({'result': 'failed', 'error': 'create bnd from archive: '+error.message});
     });
 };
@@ -165,8 +226,8 @@ exports.addAssets = function (req, res, next) {
             return assetRegistry.add(order)
                 .then(() => {
                     return businessNetworkConnection.submitTransaction(createNew)
-                    .then(() => {console.log(' order '+agriAssetId+' successfully added');
-                        res.send({'result': ' order '+agriAssetId+' successfully added'});
+                    .then(() => {console.log('asset '+agriAssetId+' successfully added');
+                        res.send({'result': 'asset '+agriAssetId+' successfully added'});
                     })
                     .catch((error) => {
                         if (error.message.search('MVCC_READ_CONFLICT') !== -1)
@@ -257,11 +318,10 @@ exports.assetsAction = function (req, res, next) {
                 .then((assetRegistry) => {
                     return assetRegistry.update(updateOrder)
                     .then(()=>{
-                        console.log("Updated")
+                        console.log("Updated");
+                        res.send({'result': 'success'});
                     })
                 })
-
-                
 
             })
             .catch((error) => {

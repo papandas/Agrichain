@@ -291,6 +291,25 @@ var pro_string, dis_string, con_string;
 }
 
 
+
+$('#load_assets_by_participant').on('click', function(){
+  let options = {};
+  options.id = 'd1@ac.c';//'p1@ac.c';//
+  options.email = 'd1@ac.c';//'p1@ac.c';//
+  options.registry = 'Distributor';//'Producer';//
+
+  console.log('[assets by participant]', options)
+  
+  $.when($.post('/composer/admin/getAssetsByParticipant', options)).done(function (results){ 
+    console.log(results.orders); 
+  })
+})
+
+
+
+
+
+
 /********************************** CONSUMER SECTION ************************
 
 
