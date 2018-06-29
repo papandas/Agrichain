@@ -43,9 +43,9 @@ router.use(function(req, res, next) {
 
 router.get('/composer/admin/getCreds*', Admin.getCreds);
 
-router.post('/composer/admin/getMyOrders*', Admin.getMyOrders);
-router.post('/composer/admin/addOrder*', Admin.addOrder);
-router.post('/composer/admin/orderAction*', Admin.orderAction);
+router.post('/composer/admin/getMyAssets*', Admin.getMyAssets);
+router.post('/composer/admin/addAssets*', Admin.addAssets);
+router.post('/composer/admin/assetsAction*', Admin.assetsAction);
 
 router.post('/composer/admin/getMembers*', Admin.getMembers);
 

@@ -57,9 +57,9 @@ exports.adminNew = function() {
  * @returns {Array} an array of assets
  * @function
  */
-exports.getMyOrders = function (req, res, next) {
+exports.getMyAssets = function (req, res, next) {
     // connect to the network
-    let method = 'getMyOrders';
+    let method = 'getMyAssets';
     console.log(method+' req.body.email is: '+req.body.email );
     let allOrders = new Array();
     let businessNetworkConnection;
@@ -78,8 +78,21 @@ exports.getMyOrders = function (req, res, next) {
             .then((orders) => {
                 allOrders = new Array();
                 for (let each in orders)
-                    { (function (_idx, _arr)
-                        {
+                    { (function (_idx, _arr){
+                            /*switch(req.body.registry){
+                                case 'Producer':
+                                    if(){
+
+                                    }
+                                    break;
+                                case 'Distributor':
+                                    break;
+                                case 'Consumer':
+                                    break;
+                            }
+                            console.log(ser.toJSON(_arr[_idx]));
+                            console.log("=============================");*/
+                            
                         let _jsn = ser.toJSON(_arr[_idx]);
                         _jsn.id = _arr[_idx].agriAssetId;
                         allOrders.push(_jsn);
@@ -113,8 +126,8 @@ exports.getMyOrders = function (req, res, next) {
  * @returns {Array} an array of assets
  * @function
  */
-exports.addOrder = function (req, res, next) {
-    let method = 'addOrder';
+exports.addAssets = function (req, res, next) {
+    let method = 'addAssets';
     console.log(method+' req.body.producer is: '+req.body.producer );
     let businessNetworkConnection;
     let factory;
@@ -136,7 +149,7 @@ exports.addOrder = function (req, res, next) {
         order.cropInsuranceCoverage = req.body.cropInsuranceCoverage;
         order.productCost = req.body.productCost;
         order.producer = factory.newRelationship(NS, 'Producer', req.body.producer);
-        order.distributor = factory.newRelationship(NS, 'Distributor', req.body.distributor);
+        //order.distributor = factory.newRelationship(NS, 'Distributor', req.body.distributor);
         order.unitCount = req.body.unitCount;
         order.unitPrice = req.body.unitPrice;
 
@@ -144,7 +157,7 @@ exports.addOrder = function (req, res, next) {
         const createNew = factory.newTransaction(NS, 'CreateAssets');
         createNew.agriasset = factory.newRelationship(NS, 'AgriAsset', order.$identifier);
         createNew.producer = factory.newRelationship(NS, 'Producer', req.body.producer);
-        createNew.distributor = factory.newRelationship(NS, 'Distributor', req.body.distributor);
+        //createNew.distributor = factory.newRelationship(NS, 'Distributor', req.body.distributor);
         
         // add the order to the asset registry.
         return businessNetworkConnection.getAssetRegistry(NS+'.AgriAsset')
@@ -193,13 +206,14 @@ exports.addOrder = function (req, res, next) {
  * orderAction - act on an order 
  * @param {express.req} req - the inbound request object from the client
  * req.body.action - string with 
+ * req.body.distributorID - (optional, only required during the time of selling to asset to distributor)while selling to distributor
  * @param {express.res} res - the outbound response object for communicating back to client
  * @param {express.next} next - an express service to enable post processing prior to responding to the client
  * @returns {Array} an array of assets
  * @function
  */
-exports.orderAction = function (req, res, next) {
-    let method = 'orderAction';
+exports.assetsAction = function (req, res, next) {
+    let method = 'assetsAction';
     console.log(method+' req.body.participant is: '+req.body.participant );
     
     
@@ -216,16 +230,19 @@ exports.orderAction = function (req, res, next) {
 
                 let factory = businessNetworkConnection.getBusinessNetwork().getFactory();
 
-                console.log(order.status)
+                console.log("Asset Processing.. Please Wait..")
             
                 updateOrder = order;
                 switch (req.body.action)
                 {
                     case 'SELLING':
                         updateOrder.status = req.body.action;
+                        const distributor = factory.newRelationship(NS, 'Distributor', req.body.distributorID);
+                        updateOrder.distributor = distributor;
+
                         break;
                     case 'SELL':
-                        const consumer = factory.newRelationship(NS, 'Consumer', req.body.participant);
+                        const consumer = factory.newRelationship(NS, 'Consumer', req.body.customerID);
                         consumer.unitPurchased = parseInt(req.body.unitPurchased);
 
                         if (updateOrder.consumer) {

@@ -23,7 +23,7 @@
 
 function CreateAssets(product) {
     product.agriasset.producer = product.producer;
-    product.agriasset.distributor = product.distributor;
+    //product.agriasset.distributor = product.distributor;
     product.agriasset.created = new Date().toISOString();
     product.agriasset.status = 'CREATED'
     return getAssetRegistry('org.acme.AgrichainNetwork.AgriAsset')

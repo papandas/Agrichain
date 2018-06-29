@@ -105,7 +105,7 @@
                             </td>
 
                             <td>
-                                <button id="load_registry">Load Registry</button>
+                                <button id="load_registry">Load Participant</button>
                                 
                             </td>
 
@@ -147,9 +147,7 @@
                     
                     <table id="addAssetBox">
                         <tr><td><span style="color: green;">Assert Input Form: Load the Distributers list first</span></td></tr>
-                        <tr><td>
-                            <table><tr><td><select id="members_list_2"></td><td><button id="load_distributer_members">Load Distributers</button></td></tr></table>
-                        </td></tr>
+                        
                         <tr><td><input type="text" id="harvestYear" placeholder="Harvest Year"></td></tr>
                         <tr><td>
                             <select id="commodity">
@@ -167,18 +165,21 @@
                         <tr><td><input type="text" id="estimatedBasic" placeholder="Estimated Basic"></td></tr>
                         <tr><td><input type="text" id="cropInsuranceCoverage" placeholder="Crop Insurance Coverage"></td></tr>
                         <tr><td><input type="text" id="productCost" placeholder="Product Cost"></td></tr>  
-                        <tr><td><button id="SaveAssets">Save</button></td></tr>                                                                                   
+                        <tr><td><button id="SaveAssets">Save</button></td></tr>    
+                        <tr><td><hr/></td></tr>  
+                        <tr><td>To sell the asset to Distribure, kindly provide the Asset Id and the Assign Distripuber. Please wait for the distributer participants to load.</td></tr> 
+                        <tr><td>
+                            <table><tr>
+                                <td><input type="text" id="assetId_to_sell" placeholder="Asset Id"></td>
+                                <td><select id="members_list_2"></td>
+                                <td><button id="load_distributer_members">Load Distributers</button></td>
+                                <td><button id="sell_to_distributer">Sell To Distributor</button></td>
+                            </tr></table>
+                        </td></tr>
                     </table>
 
                     <table id="consumerBuyBox">
-                        <tr><td><span style="color: green;">Consumer Buy Form: Wait to load Distributers list first and then select the distributer</span></td></tr>
-                        <tr><td>
-                                <table><tr>
-                                    <td><select id="members_list_3"></td>
-                                    
-                                    <td><button id="loadAssetFromDistributer">Load Assets from Distributes</button></td>
-                                </tr></table>
-                        </td></tr>
+                        <tr><td><span style="color: green;">Consumer purchase list.</span></td></tr>
                     </table>
 
                 </td>

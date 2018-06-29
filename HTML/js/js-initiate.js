@@ -56,12 +56,12 @@ var pro_string, dis_string, con_string;
     options.cropInsuranceCoverage = $('#cropInsuranceCoverage').val();
     options.productCost = $('#productCost').val();
     options.producer = $('#members_list').val();
-    options.distributor = $('#members_list_2').val();
+    //options.distributor = $('#members_list_2').val();
     options.unitCount = 0
     options.unitPrice = 0
     //console.log(options);
 
-    $.when($.post('/composer/admin/addOrder', options)).done(function (results){ 
+    $.when($.post('/composer/admin/addAssets', options)).done(function (results){ 
       console.log(results);
     })
 
@@ -83,15 +83,47 @@ var pro_string, dis_string, con_string;
         break;
       case 'Distributor':
         // Allowing Distributer to input order id and change the status of the Order
-        $('#AllOrderList').append('<input type="text" id="order_id_received" placeholder="Order Id"><button id="RECEIVED">Received</button>')
+
+        $('#AllOrderList').append('<input type="text" id="order_id_received" placeholder="Order Id"><button id="RECEIVED">Sell To Consumer</button> | <button id="load_consumers_members">Load Consumers</button> <select id="customer_list">')
+        $('#load_consumers_members').on('click', function(){
+
+          var d_prompts = $.Deferred();
+          var options = {};
+          options.registry = 'Consumer';
+          $.when($.post('/composer/admin/getMembers', options)).done(function (results)
+          { 
+
+          //console.log(results.result);
+
+          var _str = '';
+          for (each in results.members){
+              (function(_idx, _arr){
+                  //console.log(_arr[_idx].email)
+                  if (_arr[_idx].email != 'noop@dummy'){
+                      _str +='<option value="'+_arr[_idx].email+'">' +_arr[_idx].email + '</option>';
+                  }
+              })(each, results.members)
+          }
+          _str += '</select>';
+          
+          $('#customer_list').empty();
+          $('#customer_list').append(_str);
+
+          d_prompts.resolve();
+          }).fail(d_prompts.reject);
+          return d_prompts.promise(); 
+          
+        })
         $('#RECEIVED').on('click', function(){
           //console.log();
 
           let options = {};
           options.participant = $('#members_list').find(':selected').val(); // Email of the Distributer 
+          options.customerID = $('#customer_list').find(':selected').val();
           options.agriAssetId = $('#order_id_received').val() // Order Id 
-          options.action = 'SELLING' // Chaing state to Selling
-          $.when($.post('/composer/admin/orderAction', options)).done(function (results){ 
+          options.unitPurchased = parseInt("1000")
+          options.action = 'SELL' // Chaing state to Selling
+          $.when($.post('/composer/admin/assetsAction', options)).done(function (results){ 
 
             console.log(results);
 
@@ -113,10 +145,11 @@ var pro_string, dis_string, con_string;
     let options = {};
     options.id = $('#members_list').find(':selected').val();
     options.email = $('#members_list').find(':selected').val();
+    options.registry = $('#load_registry_type').find(':selected').val();
 
     //console.log("[Data Sent]", options)
 
-    $.when($.post('/composer/admin/getMyOrders', options)).done(function (results){ 
+    $.when($.post('/composer/admin/getMyAssets', options)).done(function (results){ 
       //console.log(results.orders);
       //console.log("-------------")
       let str = '';
@@ -144,7 +177,10 @@ var pro_string, dis_string, con_string;
                 str += '</li><li>Crop Insurance Coverage: ' + arr[idx].cropInsuranceCoverage;
                 str += '</li><li>Product Cost: ' + arr[idx].productCost;
                 str += '</li><li>Producer: ' + (arr[idx].producer).split('#')[1];
-                str += '</li><li>Distributor: ' + (arr[idx].distributor).split('#')[1];
+                if(arr[idx].distributor){
+                  str += '</li><li>Distributor: ' + (arr[idx].distributor).split('#')[1];
+                }
+                
                 if(arr[idx].consumer){
                   for (let each in arr[idx].consumer){
                     (function (_idx, _arr){
@@ -176,7 +212,9 @@ var pro_string, dis_string, con_string;
                 str += '</li><li>Crop Insurance Coverage: ' + arr[idx].cropInsuranceCoverage;
                 str += '</li><li>Product Cost: ' + arr[idx].productCost;
                 str += '</li><li>Producer: ' + (arr[idx].producer).split('#')[1];
-                str += '</li><li>Distributor: ' + (arr[idx].distributor).split('#')[1];
+                if(arr[idx].distributor){
+                  str += '</li><li>Distributor: ' + (arr[idx].distributor).split('#')[1];
+                }
                 if(arr[idx].consumer){
                   for (let each in arr[idx].consumer){
                     (function (_idx, _arr){
@@ -208,7 +246,9 @@ var pro_string, dis_string, con_string;
                       str += '</li><li>Crop Insurance Coverage: ' + arr[idx].cropInsuranceCoverage;
                       str += '</li><li>Product Cost: ' + arr[idx].productCost;
                       str += '</li><li>Producer: ' + (arr[idx].producer).split('#')[1];
-                      str += '</li><li>Distributor: ' + (arr[idx].distributor).split('#')[1];
+                      if(arr[idx].distributor){
+                        str += '</li><li>Distributor: ' + (arr[idx].distributor).split('#')[1];
+                      }
                       str += '</li><li>Customer: ' + (_arr[_idx]).split('#')[1];
                       str += '</li></ul><hr/>'
                       
@@ -225,7 +265,7 @@ var pro_string, dis_string, con_string;
             
             
 
-            console.log("[Consumer]", arr[idx].consumer)
+            //console.log("[Consumer]", arr[idx].consumer)
             
           })(each, results.orders)
 
@@ -248,7 +288,7 @@ var pro_string, dis_string, con_string;
 }
 
 
-/********************************** CONSUMER SECTION *************************/
+/********************************** CONSUMER SECTION ************************
 
 
 let loadAssetFromDistributer = $('#loadAssetFromDistributer');
@@ -264,7 +304,7 @@ loadAssetFromDistributer.on('click', function(){
     options.agriAssetId = $('#order_id_purchase').val() // Order Id 
     options.action = 'SELL' // Chaing state to Selling
     options.unitPurchased = parseInt($('#order_id_quantity').val());
-    $.when($.post('/composer/admin/orderAction', options)).done(function (results){ 
+    $.when($.post('/composer/admin/assetsAction', options)).done(function (results){ 
 
       console.log(results);
 
@@ -278,7 +318,7 @@ loadAssetFromDistributer.on('click', function(){
 
     //console.log("[Data Sent]", options)
 
-    $.when($.post('/composer/admin/getMyOrders', options)).done(function (results){ 
+    $.when($.post('/composer/admin/getMyAssets', options)).done(function (results){ 
       let str = '';
       if (results.orders.length < 1){
         str += 'No records fround';
@@ -309,3 +349,6 @@ loadAssetFromDistributer.on('click', function(){
       $('#AllOrderList').append(str);
     })
 })
+
+
+*/

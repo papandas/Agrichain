@@ -82,7 +82,7 @@ asset AgriAsset identified by agriAssetId {
   o String cropInsuranceCoverage
   o String productCost
   --> Producer producer
-  --> Distributor distributor
+  --> Distributor distributor optional
   --> Consumer[] consumer optional
   o String unitCount optional
   o String unitPrice optional
@@ -92,7 +92,7 @@ asset AgriAsset identified by agriAssetId {
 transaction CreateAssets{
  --> AgriAsset agriasset
  --> Producer producer
- --> Distributor distributor
+ //--> Distributor distributor
 }
 
 transaction ReceivedAssets {

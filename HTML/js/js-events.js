@@ -179,6 +179,23 @@ function LoadMemberToCreateAssets(){
 
 
 function LoadMemberDistributersForForm(){
+    let sell_to_distributer = $('#sell_to_distributer');
+    sell_to_distributer.on('click', function(){
+        var d_prompts = $.Deferred();
+        var options = {};
+        options.agriAssetId = $('#assetId_to_sell').val();
+        options.action = 'SELLING'
+        options.distributorID = $('#members_list_2').find(':selected').text();
+        options.participant = $('#members_list').find(':selected').val();
+
+
+        $.when($.post('/composer/admin/assetsAction', options)).done(function (results){
+            console.log(resuols);
+        })
+
+    })
+
+
     let _loadRegistry = $('#load_distributer_members');
     _loadRegistry.on('click', function(){
         var d_prompts = $.Deferred();
