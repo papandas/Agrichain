@@ -84,7 +84,7 @@ var pro_string, dis_string, con_string;
       case 'Distributor':
         // Allowing Distributer to input order id and change the status of the Order
 
-        $('#AllOrderList').append('<input type="text" id="order_id_received" placeholder="Order Id"><button id="RECEIVED">Sell To Consumer</button> | <button id="load_consumers_members">Load Consumers</button> <select id="customer_list">')
+        $('#AllOrderList').append('<input type="text" id="order_id_received" placeholder="Asset Id"><button id="RECEIVED">Sell To Consumer</button> | <button id="load_consumers_members">Load Consumers</button> <select id="customer_list">')
         $('#load_consumers_members').on('click', function(){
 
           var d_prompts = $.Deferred();
@@ -166,7 +166,7 @@ var pro_string, dis_string, con_string;
               if(options.email == (arr[idx].producer).split('#')[1]){
                 
                 str += '<ul>'
-                str += '<li>Order Id: ' + arr[idx].agriAssetId;            ;
+                str += '<li>Asset Id: ' + arr[idx].agriAssetId;            ;
                 str += '</li><li>Created On: ' + arr[idx].created;
                 str += '</li><li>Status: ' + arr[idx].status;
                 str += '</li><li>Harvest Year: ' + arr[idx].harvestYear;
@@ -201,7 +201,7 @@ var pro_string, dis_string, con_string;
                 
                 str += '<ul>'
                 
-                str += '<li>Order Id: ' + arr[idx].agriAssetId;            ;
+                str += '<li>Asset Id: ' + arr[idx].agriAssetId;            ;
                 str += '</li><li>Created On: ' + arr[idx].created;
                 str += '</li><li>Status: ' + arr[idx].status;
                 str += '</li><li>Harvest Year: ' + arr[idx].harvestYear;
@@ -235,7 +235,7 @@ var pro_string, dis_string, con_string;
                     if(options.email == (_arr[_idx]).split('#')[1]){
 
                       str += '<ul>'
-                      str += '<li>Order Id: ' + arr[idx].agriAssetId;            ;
+                      str += '<li>Asset Id: ' + arr[idx].agriAssetId;            ;
                       str += '</li><li>Created On: ' + arr[idx].created;
                       str += '</li><li>Status: ' + arr[idx].status;
                       str += '</li><li>Harvest Year: ' + arr[idx].harvestYear;
