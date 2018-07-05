@@ -7,6 +7,13 @@ query selectAssets {
       SELECT org.acme.AgrichainNetwork.AgriAsset
 }
 
+query selectAssetsById {
+  description: "Select all Assets by agriAssetId"
+  statement:
+      SELECT org.acme.AgrichainNetwork.AgriAsset
+        WHERE (agriAssetId == _$aid)
+}
+
 query selectAssetsByProducer {
   description: "Select all assets for a specific Producer"
   statement:

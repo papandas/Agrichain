@@ -188,7 +188,7 @@ function LoadMemberDistributersForForm(){
         options.action = 'SELLING'
         options.distributorID = $('#members_list_2').find(':selected').text();
         options.participant = $('#members_list').find(':selected').val();
-
+        options.quantity = "2222222";
 
         $.when($.post('/composer/admin/assetsAction', options)).done(function (results){
             console.log(resuols);

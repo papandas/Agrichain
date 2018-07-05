@@ -61,6 +61,7 @@ var pro_string, dis_string, con_string;
     //options.distributor = $('#members_list_2').val();
     options.unitCount = 0
     options.unitPrice = 0
+    options.quantity = "456456";
     //console.log(options);
 
     $.when($.post('/composer/admin/addAssets', options)).done(function (results){ 
@@ -125,6 +126,7 @@ var pro_string, dis_string, con_string;
           options.agriAssetId = $('#order_id_received').val() // Order Id 
           options.unitPurchased = parseInt("1000")
           options.action = 'SELL' // Chaing state to Selling
+          options.quantity = "1111"
           $.when($.post('/composer/admin/assetsAction', options)).done(function (results){ 
 
             console.log(results);
@@ -307,7 +309,25 @@ $('#load_assets_by_participant').on('click', function(){
 
 
 
+let loadAssetByOrderId = $('#load_assets_by_id');
+loadAssetByOrderId.on('click', function(){
+  $('#AllOrderList').empty();
 
+  //load_assets_by_id_text
+
+  let options = {};
+  options.email = $('#members_list').find(':selected').val();
+  options.agriAssetId = $('#load_assets_by_id_text').val(); // Order Id 
+
+  console.log("[Data Sent]", options);
+
+  $.when($.post('/composer/admin/getAssetsById', options)).done(function (results){ 
+
+    console.log("[Get Assets By Id]", results);
+
+  })
+
+});
 
 
 /********************************** CONSUMER SECTION ************************

@@ -46,6 +46,53 @@ exports.adminNew = function() {
 };
 
 
+
+exports.getAssetsById = function (req, res, next) {
+
+    let method = 'getAssetsById';
+    console.log(method+' req.body.email is: '+req.body.email );
+    let allOrders = new Array();
+    let businessNetworkConnection;
+    //if (svc.m_connection === null) {svc.createMessageSocket();}
+    let serializer;
+    let factory;
+    let archiveFile = fs.readFileSync(path.join(path.dirname(require.main.filename),'network','dist','agrichain-network.bna'));
+    businessNetworkConnection = new BusinessNetworkConnection();
+    return BusinessNetworkDefinition.fromArchive(archiveFile)
+    .then((bnd) => {
+        serializer = bnd.getSerializer();
+
+        //console.log(method+' req.body.email is: '+req.body.email );
+        return businessNetworkConnection.connect(req.body.email)
+        .then(() => {
+            //return businessNetworkConnection.query('selectAssets')
+            return businessNetworkConnection.query('selectAssetsById', {aid:req.body.agriAssetId} )
+            .then((orders) => {
+                allOrders = new Array();
+                for (let each in orders)
+                    { (function (_idx, _arr){    
+                        let _jsn = serializer.toJSON(_arr[_idx]);
+                        _jsn.id = _arr[_idx].agriAssetId;
+                        allOrders.push(_jsn);
+                    })(each, orders);
+                }
+                res.send({'result': 'success', 'orders': allOrders});
+            })
+            .catch((error) => {console.log('selectOrders failed ', error);
+                res.send({'result': 'failed', 'error': 'selectOrders: '+error.message});
+            });
+        })
+        .catch((error) => {console.log('businessNetwork connect failed ', error);
+            res.send({'result': 'failed', 'error': 'businessNetwork: '+error.message});
+        });
+    })
+    .catch((error) => {console.log('create bnd from archive failed ', error);
+        res.send({'result': 'failed', 'error': 'create bnd from archive: '+error.message});
+    });
+
+}
+
+
 /**
  * get all orders
  * @param {express.req} req - the inbound request object from the client
@@ -213,6 +260,7 @@ exports.addAssets = function (req, res, next) {
         //order.distributor = factory.newRelationship(NS, 'Distributor', req.body.distributor);
         order.unitCount = req.body.unitCount;
         order.unitPrice = req.body.unitPrice;
+        order.quantity = req.body.quantity;
 
         
         const createNew = factory.newTransaction(NS, 'CreateAssets');
@@ -294,6 +342,7 @@ exports.assetsAction = function (req, res, next) {
                 console.log("Asset Processing.. Please Wait..")
             
                 updateOrder = order;
+                updateOrder.quantity = req.body.quantity;
                 switch (req.body.action)
                 {
                     case 'SELLING':

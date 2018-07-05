@@ -81,6 +81,7 @@ asset AgriAsset identified by agriAssetId {
   o String estimatedBasic
   o String cropInsuranceCoverage
   o String productCost
+  o String quantity
   --> Producer producer
   --> Distributor distributor optional
   --> Consumer[] consumer optional
