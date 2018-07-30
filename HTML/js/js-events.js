@@ -90,7 +90,7 @@ function SetupLogin(){
 
     $.when($.post('/composer/admin/signin', options)).done(function (results){ 
 
-      console.log(results.result);
+      console.log(results);
       $('loginReplyMessage').empty();
       if(results.result === 'success'){
         $('#loginReplyMessage').append(results.members.fullname + ' is a ' + results.members.registry );
@@ -109,11 +109,15 @@ function SetupSignUp(){
     _signupBtn.on('click', function(){
 
         var options = {};
-        options.registry = $('#registry').find(':selected').text();
-        options.fullname = $('#fullname').val();
+        options.registry = 'Producer';
         options.email = $('#email').val();
-        options.cell = $('#cell').val();
-        options.password = $('#su_password').val();
+        options.fullname = $('#email').val();
+        options.cellnumber = $('#email').val();
+        options.password = $('#email').val();
+        options.accountBalance = "0";
+        options.SubCategory = $('#email').val();
+        options.Locale = $('#email').val();
+        options.UserRole = $('#email').val();
 
         console.log("waiting for signup message")
 

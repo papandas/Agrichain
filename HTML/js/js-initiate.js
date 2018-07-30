@@ -48,7 +48,21 @@ var pro_string, dis_string, con_string;
   SaveAssets.on('click', function(){
 
     var options = {};
-    options.harvestYear = $('#harvestYear').val();
+    options.created = new Date().toISOString();
+    options.status = 'IN_TRANSIT';
+    options.harvestSession = 'JUN-AUG';
+    options.productName = 'PRODUCT NAME';
+    options.productType = 'PRODUCT TYPE';
+    options.productDescription = 'DESCRIPTION';
+    options.HarvestArea = '100 Acer';
+    options.unitPrice = '0.1';
+    options.TotalYieldProduced = '1000';
+    options.YieldBalance = '1000';
+    options.InsuranceCost = '0.3%';
+    options.TotalProductCost = '350';
+    options.producer = 'a';
+
+    /*options.harvestYear = $('#harvestYear').val();
     options.created = new Date().toISOString();
     options.commodity = $('#commodity').find(':selected').val();
     options.status = 'IN_TRANSIT';
@@ -61,7 +75,7 @@ var pro_string, dis_string, con_string;
     //options.distributor = $('#members_list_2').val();
     options.unitCount = 0
     options.unitPrice = 0
-    options.quantity = "456456";
+    options.quantity = "456456";*/
     //console.log(options);
 
     $.when($.post('/composer/admin/addAssets', options)).done(function (results){ 

@@ -18,6 +18,10 @@
 const fs = require('fs');
 const path = require('path');
 const _home = require('os').homedir();
+const Tx = require('ethereumjs-tx');
+const Web3 = require('web3');
+const infuraURL = 'https://rinkeby.infura.io/v3/14470f78e2cc459d877bb629fdc5703a'
+const web3 = new Web3(infuraURL);
 
 const hlc_idCard = require('composer-common').IdCard;
 const composerAdmin = require('composer-admin');
@@ -125,8 +129,10 @@ exports.getMyAssets = function (req, res, next) {
             return businessNetworkConnection.query('selectAssets')
             .then((orders) => {
                 allOrders = new Array();
-                for (let each in orders)
-                    { (function (_idx, _arr){    
+                for (let each in orders){ 
+                    console.log("==========================");
+                    console.log(orders);
+                    (function (_idx, _arr){    
                         let _jsn = serializer.toJSON(_arr[_idx]);
                         _jsn.id = _arr[_idx].agriAssetId;
                         allOrders.push(_jsn);
@@ -245,22 +251,29 @@ exports.addAssets = function (req, res, next) {
     businessNetworkConnection = new BusinessNetworkConnection();
     return businessNetworkConnection.connect(req.body.producer)
     .then(() => {
+
+        //const producer = factory.newResource(NS, 'Producer', req.body.producer);
+        //producer.accountBalance = "100";
+
+        //console.log(producer);
+
         factory = businessNetworkConnection.getBusinessNetwork().getFactory();
         let order = factory.newResource(NS, 'AgriAsset', agriAssetId);
-        order.harvestYear = req.body.harvestYear;
         order.created = req.body.created;
-        order.commodity = req.body.commodity;
-        order.status = req.body.status;
-        order.totalAcer = req.body.totalAcer;
-        order.averageYield = req.body.averageYield;
-        order.estimatedBasic = req.body.estimatedBasic;
-        order.cropInsuranceCoverage = req.body.cropInsuranceCoverage;
-        order.productCost = req.body.productCost;
+        order.status = req.body.status
+        order.harvestSession = req.body.harvestSession;
+        order.productName = req.body.productName;
+        order.productType = req.body.productType;
+        order.productDescription = req.body.productDescription;
+        order.HarvestArea = req.body.HarvestArea;
+        order.unitPrice = req.body.unitPrice;
+        order.TotalYieldProduced = req.body.TotalYieldProduced;
+        order.YieldBalance = req.body.YieldBalance;
+        order.InsuranceCost = req.body.InsuranceCost;
+        order.TotalProductCost = req.body.TotalProductCost;
         order.producer = factory.newRelationship(NS, 'Producer', req.body.producer);
         //order.distributor = factory.newRelationship(NS, 'Distributor', req.body.distributor);
         order.unitCount = req.body.unitCount;
-        order.unitPrice = req.body.unitPrice;
-        order.quantity = req.body.quantity;
 
         
         const createNew = factory.newTransaction(NS, 'CreateAssets');
@@ -299,13 +312,13 @@ exports.addAssets = function (req, res, next) {
                 });
         })
         .catch((error) => {
-            console.log(orderNo+' getAssetRegistry failed: ',error.message);
-            res.send({'result': 'failed', 'error':' order '+orderNo+' getAssetRegistry failed '+error.message});
+            console.log(agriAssetId+' getAssetRegistry failed: ',error.message);
+            res.send({'result': 'failed', 'error':' order '+agriAssetId+' getAssetRegistry failed '+error.message});
         });
     })
     .catch((error) => {
-        console.log(orderNo+' business network connection failed: text',error.message);
-        res.send({'result': 'failed', 'error':' order '+orderNo+' add failed on on business network connection '+error.message});
+        console.log(agriAssetId+' business network connection failed: text',error.message);
+        res.send({'result': 'failed', 'error':' order '+agriAssetId+' add failed on on business network connection '+error.message});
     });
 };
 
@@ -314,6 +327,9 @@ exports.addAssets = function (req, res, next) {
 /**
  * orderAction - act on an order 
  * @param {express.req} req - the inbound request object from the client
+ * req.body.accountHash - string with 
+ * req.body.privateKeyHash - string with 
+ * req.body.accountHastTo
  * req.body.action - string with 
  * req.body.distributorID - (optional, only required during the time of selling to asset to distributor)while selling to distributor
  * @param {express.res} res - the outbound response object for communicating back to client
@@ -328,6 +344,10 @@ exports.assetsAction = function (req, res, next) {
     
     let businessNetworkConnection;
     let updateOrder;
+    let accountHashFrom = req.body.accountHashFrom;
+    let privateKeyHashFrom = req.body.privateKeyHashFrom;
+    let accountHastTo = req.body.accountHastTo;
+
     businessNetworkConnection = new BusinessNetworkConnection();
     
     return businessNetworkConnection.connect(req.body.participant)
@@ -340,37 +360,81 @@ exports.assetsAction = function (req, res, next) {
                 let factory = businessNetworkConnection.getBusinessNetwork().getFactory();
 
                 console.log("Asset Processing.. Please Wait..")
-            
-                updateOrder = order;
-                updateOrder.quantity = req.body.quantity;
-                switch (req.body.action)
-                {
-                    case 'SELLING':
-                        updateOrder.status = req.body.action;
-                        const distributor = factory.newRelationship(NS, 'Distributor', req.body.distributorID);
-                        updateOrder.distributor = distributor;
 
-                        break;
-                    case 'SELL':
-                        const consumer = factory.newRelationship(NS, 'Consumer', req.body.customerID);
-                        consumer.unitPurchased = parseInt(req.body.unitPurchased);
+                web3.eth.getBalance(accountHashFrom, (err, res) => {
+                    if(err != null){
+                        if(parseInt(res) > 0){
+                            console.log('Eth Balance Available: ', web3.utils.fromWei(res, 'ether'))
 
-                        if (updateOrder.consumer) {
-                            updateOrder.consumer.push(consumer);
-                        } else {
-                            updateOrder.consumer = [consumer];
+                            const privateKey = Buffer.from(privateKeyHashFrom.substr(2), 'hex');
+                            const payableAmt = ( parseFloat(order.unitPrice) * parseFloat(req.body.YieldBalance) ).toString;
+
+                            console.log("Eth payable:", "(" + order.unitPrice + " X " + req.body.YieldBalance + ")", payableAmt)
+
+                            web3.eth.getTransactionCount(accountHashFrom, (err, txCount) => {
+                                const txObject = {
+                                    nonce: web3.utils.toHex(txCount),
+                                    to: accountHastTo,
+                                    value: web3.utils.toHex(web3.utils.toWei(payableAmt, 'ether')),
+                                    gasLimit: web3.utils.toHex(21000),
+                                    gasPrice: web3.utils.toHex(web3.utils.toWei('10', 'gwei'))
+                                }
+                                
+                                const tx = new Tx(txObject);
+                                tx.sign(privateKey);
+
+                                const serializedTransaction = tx.serialize();
+                                const raw = '0x' + serializedTransaction.toString('hex');
+
+                                web3.eth.sendSignedTransaction(raw, (err, txHash) => {
+                                    console.log('txHash:', txHash);
+
+                                    updateOrder = order;
+                                    updateOrder.YieldBalance = req.body.YieldBalance;
+                                    switch (req.body.action)
+                                    {
+                                        case 'SELLING':
+                                            updateOrder.status = req.body.action;
+                                            const distributor = factory.newRelationship(NS, 'Distributor', req.body.distributorID);
+                                            distributor.accountBalance = ( parseFloat(order.YieldBalance) - parseFloat(req.body.YieldBalance) ).toString;
+                                            updateOrder.distributor = distributor;
+
+                                            break;
+                                        case 'SELL':
+                                            const consumer = factory.newRelationship(NS, 'Consumer', req.body.customerID);
+                                            consumer.unitPurchased = parseInt(req.body.unitPurchased);
+
+                                            if (updateOrder.consumer) {
+                                                updateOrder.consumer.push(consumer);
+                                            } else {
+                                                updateOrder.consumer = [consumer];
+                                            }
+                                            break;
+                                    }
+
+                                    return businessNetworkConnection.getAssetRegistry(NS+'.AgriAsset')
+                                    .then((assetRegistry) => {
+                                        return assetRegistry.update(updateOrder)
+                                        .then(()=>{
+                                            console.log("Updated");
+                                            res.send({'result': 'success'});
+                                        })
+                                    })
+                                    
+                                })
+                            })
+
+                            
+
+                        }else{
+                            console.log('Insufficient account balance.');
+                            res.send({'result': 'failed', 'error': 'Insufficient account balance.'});
                         }
-                        break;
-                }
-
-                return businessNetworkConnection.getAssetRegistry(NS+'.AgriAsset')
-                .then((assetRegistry) => {
-                    return assetRegistry.update(updateOrder)
-                    .then(()=>{
-                        console.log("Updated");
-                        res.send({'result': 'success'});
-                    })
-                })
+                    }
+                    //web3.utils.fromWei(res, 'ether')
+                });
+            
+                
 
             })
             .catch((error) => {
@@ -494,6 +558,11 @@ exports.SignIn = function(req, res, next) {
                 Members.cellnumber = _res.cellnumber;
                 Members.password = _res.password;
                 Members.accountBalance = _res.accountBalance;
+                Members.accountHash = _res.accountHash;
+                Members.privateKeyHash = _res.privateKeyHash;
+                Members.SubCategory = res.SubCategory;
+                Members.Locale = res.Locale;
+                Members.UserRole = res.UserRole;
                 
                 res.send({'result': 'success', 'members': Members})
             })
@@ -511,6 +580,11 @@ exports.SignIn = function(req, res, next) {
                         Members.cellnumber = _res.cellnumber;
                         Members.password = _res.password;
                         Members.accountBalance = _res.accountBalance;
+                        Members.accountHash = _res.accountHash;
+                        Members.privateKeyHash = _res.privateKeyHash;
+                        Members.SubCategory = res.SubCategory;
+                        Members.Locale = res.Locale;
+                        Members.UserRole = res.UserRole;
 
                         res.send({'result': 'success', 'members': Members})
                     
@@ -529,6 +603,11 @@ exports.SignIn = function(req, res, next) {
                                 Members.cellnumber = _res.cellnumber;
                                 Members.password = _res.password;
                                 Members.accountBalance = _res.accountBalance;
+                                Members.accountHash = _res.accountHash;
+                                Members.privateKeyHash = _res.privateKeyHash;
+                                Members.SubCategory = res.SubCategory;
+                                Members.Locale = res.Locale;
+                                Members.UserRole = res.UserRole;
 
                                 res.send({'result': 'success', 'members': Members})             
                             
@@ -555,6 +634,9 @@ exports.SignIn = function(req, res, next) {
  *  req.body.cell: _string - cell numbr of the particapent
  *  req.body.fullname: _string - the full name of the particapent
  *  req.body.registry: _string - type of registry to search; e.g. 'Producer', 'Distributor', 'Consumer'.
+ *  req.body.SubCategory
+ *  req,body.Locale
+ *  req.body.UserRole
  * @param {express.res} res - the outbound response object for communicating back to client
  * @param {express.next} next - an express service to enable post processing prior to responding to the client
  * @returns {Object} an array of members
@@ -566,6 +648,7 @@ exports.SignUp = function(req, res, next) {
     let businessNetworkConnection;
     let factory;
     let participant;
+    var accounts = web3.eth.accounts.create();
     let adminConnection = new AdminConnection();
     adminConnection.connect(config.composer.adminCard)
     .then(()=>{
@@ -582,9 +665,14 @@ exports.SignUp = function(req, res, next) {
                     
                     const participant = factory.newResource(NS, req.body.registry, req.body.email);
                     participant.fullname = req.body.fullname;
-                    participant.cellnumber = req.body.cell;
+                    participant.cellnumber = req.body.cellnumber;
                     participant.password = req.body.password;
-                    participant.accountBalance = 0;
+                    participant.accountBalance = "0";
+                    participant.accountHash = accounts.address;
+                    participant.privateKeyHash = accounts.privateKey;
+                    participant.SubCategory = req.body.SubCategory;
+                    participant.Locale = req.body.Locale;
+                    participant.UserRole = req.body.UserRole;
 
                     return participantRegistry.add(participant)
                     .then(() => {

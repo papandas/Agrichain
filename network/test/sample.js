@@ -29,7 +29,7 @@ const network = 'agrichain-network';
 const _timeout = 90000;
 const NS = 'org.acme.AgrichainNetwork';
 //const ShippingID = '12345';
-let rand = 1;
+let rand = 0;
 const producerID = 'producter'+rand+'@agrichain.com';
 const distributorID = 'distributor'+rand+'@agrichain.com';
 const consumerID = 'consumer'+rand+'@agrichain.com';
@@ -61,19 +61,19 @@ describe('Agriculture Blockchain Network', function () {
             producer.fullname = 'Producer FullName';
             producer.cellnumber = '1111111111';
             producer.password = 'password';
-            producer.accountBalance = 0;
+            producer.accountBalance = "0";
 
             const distributor = factory.newResource(NS, 'Distributor', distributorID);
             distributor.fullname = 'Distributor FullName';
             distributor.cellnumber = '2222222222';
             distributor.password = 'password';
-            distributor.accountBalance = 0;
+            distributor.accountBalance = "0";
 
             const consumer = factory.newResource(NS, 'Consumer', consumerID);
             consumer.fullname = 'Consumner FullName';
             consumer.cellnumber = '3333333333';
             consumer.password = 'password';
-            consumer.accountBalance = 0;
+            consumer.accountBalance = "0";
 
             const agriAsset = factory.newResource(NS, 'AgriAsset', contractID);
             agriAsset.harvestYear = '2018';
@@ -102,6 +102,24 @@ describe('Agriculture Blockchain Network', function () {
             shipment.status = 'IN_TRANSIT';
             shipment.unitCount = 5000;
             shipment.contract = factory.newRelationship(NS, 'Contract', contract.$identifier);*/
+
+            let adminConnection = new AdminConnection();
+            adminConnection.connect(config.composer.adminCard)
+            .then(()=>{
+                businessNetworkConnection = new BusinessNetworkConnection();
+                return businessNetworkConnection.connect(config.composer.adminCard)
+                .then(()=>{
+                    factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+                    return businessNetworkConnection.getParticipantRegistry(NS+'.'+req.body.registry)
+                    .then((participantRegistry)=>{
+                        return participantRegistry.get(req.body.email)
+                        .then((_res) => { res.send('member already exists. add cancelled');})
+                        .catch((_res) => {
+                            
+                        })
+                    })
+                })
+            })
 
             return businessNetworkConnection.getAssetRegistry(NS + '.AgriAsset')
             .then((assetRegistry)=>{

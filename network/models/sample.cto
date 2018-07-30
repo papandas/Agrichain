@@ -48,7 +48,12 @@ abstract participant Business identified by email {
   o String fullname 
   o String cellnumber
   o String password
-  o Double accountBalance
+  o String accountBalance
+  o String accountHash
+  o String privateKeyHash
+  o String SubCategory
+  o String Locale
+  o String UserRole
 }
 
 /**
@@ -73,20 +78,21 @@ participant Consumer extends Business {
 asset AgriAsset identified by agriAssetId {
   o String agriAssetId
   o String created
-  o String harvestYear
-  o CommodityType commodity
-  o AssetStatus status
-  o String totalAcer
-  o String averageYield
-  o String estimatedBasic
-  o String cropInsuranceCoverage
-  o String productCost
-  o String quantity
+  o String status
+  o String harvestSession
+  o String productName
+  o String productType
+  o String productDescription
+  o String HarvestArea
+  o String unitPrice
+  o String TotalYieldProduced
+  o String YieldBalance
+  o String InsuranceCost
+  o String TotalProductCost
   --> Producer producer
   --> Distributor distributor optional
   --> Consumer[] consumer optional
   o String unitCount optional
-  o String unitPrice optional
 }
 
 
