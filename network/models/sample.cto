@@ -90,9 +90,20 @@ asset AgriAsset identified by agriAssetId {
   o String InsuranceCost
   o String TotalProductCost
   --> Producer producer
-  --> Distributor distributor optional
-  --> Consumer[] consumer optional
-  o String unitCount optional
+  o String[] distributor optional
+  o String[] consumer optional
+  
+}
+
+asset Orders identified by OrderId {
+  o String OrderId
+  o String created
+  o String AssetId
+  o String quantity
+  o String status
+  --> Producer producer
+  --> Distributor distributor
+  o String deliveryDate optional
 }
 
 

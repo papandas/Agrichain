@@ -69,6 +69,15 @@
                             <td><input type="password" id="su_password" placeholder="Password"></td>
                         </tr>
                         <tr>
+                            <td><input type="text" id="SubCategory" placeholder="Sub Category"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="Locale" placeholder="Locale"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="UserRole" placeholder="User Role"></td>
+                        </tr>
+                        <tr>
                             <td><button id="SignUpSubmit" >Sign Up</button></td>
                         </tr>
                     </table>
@@ -132,6 +141,7 @@
 
                             <td>
                                 <button id="members_load_assets">Load Assets</button> | 
+                                <button id="members_load_orders">Load Orders</button> | 
                                 <!-- Only supports Producer & Dristobutes -->
                                 <!-- <button id="load_assets_by_participant">Load Assets By Participant</button> -->
                                 <input type="text" id="load_assets_by_id_text" placeholder="Asset Order Id">
@@ -141,6 +151,19 @@
 
                         </tr>
                     </table>
+                    
+                    <hr/>
+                    <p>Place Order</p>
+                    <input type="text" id="order1_id" placeholder="Asset Id">
+                    <input type="text" id="qty1_id" placeholder="Quantity">
+                    <input type="text" id="producer1_id" placeholder="Producer">
+                    <input type="text" id="distributor1_id" placeholder="Distributor">
+                    <button id="PlaceOrderByDistributor">Place Order By Distributor</button>
+                    <hr/>
+                    <p>Order Action</p>
+                    <input type="text" id="order2_id" placeholder="Asset Id" value="p11533062743619">
+                    <input type="text" id="acton2_id" placeholder="Action" value="RECEIVED">
+                    <button id="UpdateOrder">Update Order</button>
 
                 </td>
             </tr>
@@ -152,23 +175,17 @@
                     <table id="addAssetBox">
                         <tr><td><span style="color: green;">Assert Input Form: Load the Distributers list first</span></td></tr>
                         
-                        <tr><td><input type="text" id="harvestYear" placeholder="Harvest Year"></td></tr>
-                        <tr><td>
-                            <select id="commodity">
-                                <option value="POTATO">POTATO</option>
-                                <option value="APPLES">APPLES</option>
-                                <option value="STRAWBERRY">STRAWBERRY</option>
-                                <option value="BLUEBERRY">BLUEBERRY</option>
-                                <option value="BLUEB">BLUEB</option>
-                                <option value="WHEAT">WHEAT</option>
-                                <option value="OAT">OAT</option>
-                            </select>
-                        </td></tr>
-                        <tr><td><input type="text" id="totalAcer" placeholder="Total Acer"></td></tr>
-                        <tr><td><input type="text" id="averageYield" placeholder="Average Yield"></td></tr>
-                        <tr><td><input type="text" id="estimatedBasic" placeholder="Estimated Basic"></td></tr>
-                        <tr><td><input type="text" id="cropInsuranceCoverage" placeholder="Crop Insurance Coverage"></td></tr>
-                        <tr><td><input type="text" id="productCost" placeholder="Product Cost"></td></tr>  
+                        <tr><td><input type="text" id="harvestSession" placeholder="Harvest Session"></td></tr>
+                        <tr><td><input type="text" id="productName" placeholder="Product Name"></td></tr>
+                        <tr><td><input type="text" id="productType" placeholder="Product Type"></td></tr>
+                        <tr><td><input type="text" id="productDescription" placeholder="Product Description"></td></tr>
+                        <tr><td><input type="text" id="HarvestArea" placeholder="Harvest Area"></td></tr>
+                        <tr><td><input type="text" id="unitPrice" placeholder="Unit Price"></td></tr>
+                        <tr><td><input type="text" id="TotalYieldProduced" placeholder="Total Yield Produced"></td></tr>
+                        <tr><td><input type="text" id="InsuranceCost" placeholder="Insurance Cost"></td></tr>
+                        <tr><td><input type="text" id="TotalProductCost" placeholder="Total Product Cost"></td></tr>
+                        
+                        
                         <tr><td><button id="SaveAssets">Save</button></td></tr>    
                         <tr><td><hr/></td></tr>  
                         <tr><td>To sell the asset to Distribure, kindly provide the Asset Id and the Assign Distripuber. Please wait for the distributer participants to load.</td></tr> 

@@ -27,3 +27,17 @@ query selectAssetsByDistributor {
       SELECT org.acme.AgrichainNetwork.AgriAsset
           WHERE (distributor == _$email)
 }
+
+query selectOrderByProducer {
+  description: "Select all Orders for a specific Producer"
+  statement:
+      SELECT org.acme.AgrichainNetwork.Orders
+          WHERE (producer == _$email)
+}
+
+query selectOrderByDistributor {
+  description: "Select all Orders for a specific Distributor"
+  statement:
+      SELECT org.acme.AgrichainNetwork.Orders
+          WHERE (distributor == _$email)
+}

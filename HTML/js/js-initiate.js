@@ -20,6 +20,8 @@ var businessNetwork = "agrichain-network";
 var producer, distributor, consumer;
 var pro_string, dis_string, con_string;
 
+var memeberArray = new Array();
+
 /**
 * standard home page initialization routine
 * Refer to this by {@link initPage()}.
@@ -50,33 +52,17 @@ var pro_string, dis_string, con_string;
     var options = {};
     options.created = new Date().toISOString();
     options.status = 'IN_TRANSIT';
-    options.harvestSession = 'JUN-AUG';
-    options.productName = 'PRODUCT NAME';
-    options.productType = 'PRODUCT TYPE';
-    options.productDescription = 'DESCRIPTION';
-    options.HarvestArea = '100 Acer';
-    options.unitPrice = '0.1';
-    options.TotalYieldProduced = '1000';
-    options.YieldBalance = '1000';
-    options.InsuranceCost = '0.3%';
-    options.TotalProductCost = '350';
-    options.producer = 'a';
-
-    /*options.harvestYear = $('#harvestYear').val();
-    options.created = new Date().toISOString();
-    options.commodity = $('#commodity').find(':selected').val();
-    options.status = 'IN_TRANSIT';
-    options.totalAcer = $('#totalAcer').val();
-    options.averageYield = $('#averageYield').val();
-    options.estimatedBasic = $('#estimatedBasic').val();
-    options.cropInsuranceCoverage = $('#cropInsuranceCoverage').val();
-    options.productCost = $('#productCost').val();
-    options.producer = $('#members_list').val();
-    //options.distributor = $('#members_list_2').val();
-    options.unitCount = 0
-    options.unitPrice = 0
-    options.quantity = "456456";*/
-    //console.log(options);
+    options.harvestSession = $('#harvestSession').val();;
+    options.productName = $('#productName').val();;
+    options.productType = $('#productType').val();;
+    options.productDescription = $('#productDescription').val();;
+    options.HarvestArea = $('#HarvestArea').val();;
+    options.unitPrice = $('#unitPrice').val();;
+    options.TotalYieldProduced = $('#TotalYieldProduced').val();;
+    options.YieldBalance = $('#TotalYieldProduced').val();;
+    options.InsuranceCost = $('#InsuranceCost').val();;
+    options.TotalProductCost = $('#TotalProductCost').val();;
+    options.producer = $('#members_list').val();;
 
     $.when($.post('/composer/admin/addAssets', options)).done(function (results){ 
       console.log(results);
@@ -141,11 +127,21 @@ var pro_string, dis_string, con_string;
           options.unitPurchased = parseInt("1000")
           options.action = 'SELL' // Chaing state to Selling
           options.quantity = "1111"
-          $.when($.post('/composer/admin/assetsAction', options)).done(function (results){ 
+
+          for(let each in memeberArray){
+            (function(idx, arr){
+              if(arr[idx].email == $('#members_list').find(':selected').val()){
+                console.log("P", arr[idx])
+              }
+            })(each, memeberArray)
+          }
+
+          
+          /*$.when($.post('/composer/admin/assetsAction', options)).done(function (results){ 
 
             console.log(results);
 
-          })
+          })*/
 
         })
         isDistributer = true;
@@ -187,16 +183,19 @@ var pro_string, dis_string, con_string;
                 str += '<li>Asset Id: ' + arr[idx].agriAssetId;            ;
                 str += '</li><li>Created On: ' + arr[idx].created;
                 str += '</li><li>Status: ' + arr[idx].status;
-                str += '</li><li>Harvest Year: ' + arr[idx].harvestYear;
-                str += '</li><li>Commodity: ' + arr[idx].commodity;
-                str += '</li><li>Total Acer: ' + arr[idx].totalAcer;
-                str += '</li><li>Average Yield: ' + arr[idx].averageYield;
-                str += '</li><li>Estimated Basic: ' + arr[idx].estimatedBasic;
-                str += '</li><li>Crop Insurance Coverage: ' + arr[idx].cropInsuranceCoverage;
-                str += '</li><li>Product Cost: ' + arr[idx].productCost;
+                str += '</li><li>Harvest Session: ' + arr[idx].harvestSession;
+                str += '</li><li>Product Name: ' + arr[idx].productName;
+                str += '</li><li>Product Type: ' + arr[idx].productType;
+                str += '</li><li>Product Description: ' + arr[idx].productDescription;
+                str += '</li><li>Harvest Area: ' + arr[idx].HarvestArea;
+                str += '</li><li>Unit Price: ' + arr[idx].unitPrice;
+                str += '</li><li>Total Yield Produced: ' + arr[idx].TotalYieldProduced;
+                str += '</li><li>Yield Balance: ' + arr[idx].YieldBalance;
+                str += '</li><li>Insurance Cost: ' + arr[idx].InsuranceCost;
+                str += '</li><li>Total Product Cost: ' + arr[idx].TotalProductCost;
                 str += '</li><li>Producer: ' + (arr[idx].producer).split('#')[1];
                 if(arr[idx].distributor){
-                  str += '</li><li>Distributor: ' + (arr[idx].distributor).split('#')[1];
+                  str += '</li><li>Distributor: ' + (arr[idx].distributor);
                 }
                 
                 if(arr[idx].consumer){
@@ -206,7 +205,7 @@ var pro_string, dis_string, con_string;
                     })(each, arr[idx].consumer)
                   }
                 }
-                //str += '</li><li>Unit Count: ' + arr[idx].unitCount;
+                //str += '</li><li>' + '<button id="PlaceOrderByDistributor">Place Order By Distributor</button>';
                 //str += '</li><li>Unit Price: ' + arr[idx].unitPrice;
                 str += '</li></ul><hr/>'
 
@@ -344,67 +343,77 @@ loadAssetByOrderId.on('click', function(){
 });
 
 
-/********************************** CONSUMER SECTION ************************
+$('#PlaceOrderByDistributor').on('click', function(){
+  let options = {};
+  options.AssetId = $('#order1_id').val();;
+  options.quantity = $('#qty1_id').val();
+  options.status = 'CREATED';
+  options.producer = $('#producer1_id').val();
+  options.distributor = $('#distributor1_id').val();
+  
+  //console.log(options)
 
+  $.when($.post('/composer/admin/addOrders', options)).done(function (results){ 
 
-let loadAssetFromDistributer = $('#loadAssetFromDistributer');
-loadAssetFromDistributer.on('click', function(){
-  $('#AllOrderList').empty();
-
-  $('#AllOrderList').append('<input type="text" id="order_id_purchase" placeholder="Order Id"><input type="text" id="order_id_quantity" placeholder="Quantity"><button id="PURCHASE">PURCHASE</button>')
-  $('#PURCHASE').on('click', function(){
-    //order_id_quantity | order_id_purchase | 
-
-    let options = {};
-    options.participant = $('#members_list').find(':selected').val(); // Email of the Consumer 
-    options.agriAssetId = $('#order_id_purchase').val() // Order Id 
-    options.action = 'SELL' // Chaing state to Selling
-    options.unitPurchased = parseInt($('#order_id_quantity').val());
-    $.when($.post('/composer/admin/assetsAction', options)).done(function (results){ 
-
-      console.log(results);
-
-    })
+    console.log(results);
 
   })
 
-  let options = {};
-    options.id = $('#members_list_3').find(':selected').val();
-    options.email = $('#members_list_3').find(':selected').val();
-
-    //console.log("[Data Sent]", options)
-
-    $.when($.post('/composer/admin/getMyAssets', options)).done(function (results){ 
-      let str = '';
-      if (results.orders.length < 1){
-        str += 'No records fround';
-      }else{
-        for (let each in results.orders){
-          (function (idx, arr){
-
-            if(options.email == (arr[idx].distributor).split('#')[1] && arr[idx].status == 'SELLING'){
-              str += '<ul>'
-              str += '<li>Order Id: ' + arr[idx].agriAssetId;            ;
-              str += '</li><li>Created On: ' + arr[idx].created;
-              str += '</li><li>Status: ' + arr[idx].status;
-              str += '</li><li>Harvest Year: ' + arr[idx].harvestYear;
-              str += '</li><li>Commodity: ' + arr[idx].commodity;
-              str += '</li><li>Total Acer: ' + arr[idx].totalAcer;
-              str += '</li><li>Average Yield: ' + arr[idx].averageYield;
-              str += '</li><li>Estimated Basic: ' + arr[idx].estimatedBasic;
-              str += '</li><li>Crop Insurance Coverage: ' + arr[idx].cropInsuranceCoverage;
-              str += '</li><li>Product Cost: ' + arr[idx].productCost;
-              str += '</li><li>Producer: ' + (arr[idx].producer).split('#')[1];
-              str += '</li><li>Distributor: ' + (arr[idx].distributor).split('#')[1];
-              str += '</li></ul><hr/>'
-            }
-
-          })(each, results.orders)
-        }
-      }
-      $('#AllOrderList').append(str);
-    })
 })
 
 
-*/
+// LOAD ORDERS 
+
+$('#members_load_orders').on('click', function(){
+  //getOrdersByParticipants
+
+  let options = {};
+  options.email = $('#members_list').val();;
+  options.registry = $('#load_registry_type').val();
+
+  $.when($.post('/composer/admin/getOrdersByParticipants', options)).done(function (results){ 
+
+    //console.log(results);
+
+    let str = '';
+
+    for (let each in results.orders){
+      (function (idx, arr){
+
+        str += 'AssetId: ' + arr[idx].AssetId;
+        str += '<br/>OrderId: ' + arr[idx].OrderId;
+        str += '<br/>distributor: ' + (arr[idx].distributor).split('#')[1];
+        str += '<br/>producer: ' + (arr[idx].producer).split('#')[1];
+        str += '<br/>status: ' + arr[idx].status;
+        str += '<br/>deliveryDate: ' + arr[idx].deliveryDate;
+        str += '<hr>'
+
+      })(each, results.orders)
+
+    }
+
+    $('#AllOrderList').empty();
+
+    $('#AllOrderList').append(str)
+
+  })
+})
+
+// UPDATE ORDRES
+
+$('#UpdateOrder').on('click', function(){
+  let options = {};
+  options.email = $('#members_list').val();
+  options.registry = $('#load_registry_type').val();
+  options.orderid = $('#order2_id').val();
+  options.status = $('#acton2_id').val();
+  options.deliveryDate = new Date().toISOString();
+
+  $.when($.post('/composer/admin/orderAction', options)).done(function (results){ 
+
+    console.log(results)
+
+  })
+
+
+})

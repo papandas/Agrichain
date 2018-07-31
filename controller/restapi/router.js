@@ -46,6 +46,9 @@ router.get('/composer/admin/getCreds*', Admin.getCreds);
 router.post('/composer/admin/getMyAssets*', Admin.getMyAssets);
 router.post('/composer/admin/getAssetsById*', Admin.getAssetsById);
 router.post('/composer/admin/getAssetsByParticipant*', Admin.getAssetsByParticipant);
+router.post('/composer/admin/addOrders*', Admin.addOrders);
+router.post('/composer/admin/getOrdersByParticipants*', Admin.getOrdersByParticipants);
+router.post('/composer/admin/orderAction*', Admin.orderAction);
 router.post('/composer/admin/addAssets*', Admin.addAssets);
 router.post('/composer/admin/assetsAction*', Admin.assetsAction);
 

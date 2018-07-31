@@ -90,7 +90,8 @@ function SetupLogin(){
 
     $.when($.post('/composer/admin/signin', options)).done(function (results){ 
 
-      console.log(results);
+      console.log( results.members.fullname + " accountHash", "https://rinkeby.etherscan.io/address/" + results.members.accountHash, results.members.privateKeyHash);
+
       $('loginReplyMessage').empty();
       if(results.result === 'success'){
         $('#loginReplyMessage').append(results.members.fullname + ' is a ' + results.members.registry );
@@ -109,15 +110,15 @@ function SetupSignUp(){
     _signupBtn.on('click', function(){
 
         var options = {};
-        options.registry = 'Producer';
+        options.registry = $('#registry').find(':selected').val();;
         options.email = $('#email').val();
-        options.fullname = $('#email').val();
-        options.cellnumber = $('#email').val();
-        options.password = $('#email').val();
+        options.fullname = $('#fullname').val();
+        options.cellnumber = $('#cell').val();
+        options.password = $('#su_password').val();
         options.accountBalance = "0";
-        options.SubCategory = $('#email').val();
-        options.Locale = $('#email').val();
-        options.UserRole = $('#email').val();
+        options.SubCategory = $('#SubCategory').val();
+        options.Locale = $('#Locale').val();
+        options.UserRole = $('#UserRole').val();
 
         console.log("waiting for signup message")
 
@@ -163,11 +164,18 @@ function LoadMemberToCreateAssets(){
         //console.log(results.result);
 
         var _str = '';
+        memeberArray = new Array();
         for (each in results.members){
             (function(_idx, _arr){
-                //console.log(_arr[_idx].email)
+                //console.log(_arr[_idx])
                 if (_arr[_idx].email != 'noop@dummy'){
                     _str +='<option value="'+_arr[_idx].email+'">' +_arr[_idx].email + '</option>';
+                    let memeber = {};
+                    memeber.email = _arr[_idx].email;
+                    memeber.accountHash = _arr[_idx].accountHash;
+                    memeber.privateKeyHash = _arr[_idx].privateKeyHash;
+                    memeberArray.push(memeber);
+
                 }
             })(each, results.members)
         }

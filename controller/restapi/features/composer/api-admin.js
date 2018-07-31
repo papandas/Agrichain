@@ -130,8 +130,8 @@ exports.getMyAssets = function (req, res, next) {
             .then((orders) => {
                 allOrders = new Array();
                 for (let each in orders){ 
-                    console.log("==========================");
-                    console.log(orders);
+                    //console.log("==========================");
+                    //console.log(orders);
                     (function (_idx, _arr){    
                         let _jsn = serializer.toJSON(_arr[_idx]);
                         _jsn.id = _arr[_idx].agriAssetId;
@@ -228,6 +228,344 @@ exports.getAssetsByParticipant = function (req, res, next) {
 };
 
 
+exports.addOrders = function(req, res, next){
+    let method = 'addOrders';
+    console.log(method+' req.body.producer is: '+req.body.producer );
+    let businessNetworkConnection;
+    let factory;
+    let ts = Date.now();
+    let OrderId = req.body.producer.replace(/@/, '').replace(/\./, '')+ts;
+    //if (svc.m_connection === null) {svc.createMessageSocket();}
+    businessNetworkConnection = new BusinessNetworkConnection();
+    return businessNetworkConnection.connect(req.body.producer)
+    .then(() => {
+
+        factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+
+        let order = factory.newResource(NS, 'Orders', OrderId);
+        order.AssetId = req.body.AssetId;
+        order.quantity = req.body.quantity
+        order.status = req.body.status;
+        order.created = new Date().toISOString();;
+        order.producer = factory.newRelationship(NS, 'Producer', req.body.producer);;
+        order.distributor = factory.newRelationship(NS, 'Distributor', req.body.distributor);
+
+        return businessNetworkConnection.getAssetRegistry(NS+'.Orders')
+        .then((assetRegistry) => {
+            return assetRegistry.add(order)
+            .then(() => {
+                console.log('order '+OrderId+' successfully added');
+                res.send({'result': 'order '+OrderId+' successfully added'});
+            });
+        })
+
+    })
+}
+
+
+exports.getOrdersByParticipants = function(req, res, next){
+    let method = 'getOrdersByParticipants';
+    console.log(method+' req.body.email is: '+req.body.email );
+    let allOrders = new Array();
+    let businessNetworkConnection;
+    //if (svc.m_connection === null) {svc.createMessageSocket();}
+    let serializer;
+    let factory;
+    let archiveFile = fs.readFileSync(path.join(path.dirname(require.main.filename),'network','dist','agrichain-network.bna'));
+    businessNetworkConnection = new BusinessNetworkConnection();
+    return BusinessNetworkDefinition.fromArchive(archiveFile)
+    .then((bnd) => {
+        serializer = bnd.getSerializer();
+
+        console.log(method+' req.body.email is: '+req.body.email);
+        //config.composer.adminCard
+        return businessNetworkConnection.connect(req.body.email)
+        .then(() => {
+            
+            factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+            const participant = factory.newRelationship(NS, req.body.registry, req.body.email);
+            console.log('resource:' + participant.$namespace + '.' + participant.$type + '#'+ participant.$identifier);
+            
+            const data = 'resource:' + participant.$namespace + '.' + participant.$type + '#'+ participant.$identifier;
+            const email = 'email';
+
+            let queryStr = '';
+            if(req.body.registry == 'Producer'){
+                queryStr = 'selectOrderByProducer';
+            }else{
+                queryStr = 'selectOrderByDistributor';
+            }
+
+            console.log(queryStr)
+
+            return businessNetworkConnection.query(queryStr,{email:data} ) 
+            .then((orders)=>{
+                //console.log(orders);
+                allOrders = new Array();
+                for (let each in orders){
+                    (function (_idx, _arr){
+                        let _jsn = serializer.toJSON(_arr[_idx]);
+                        _jsn.id = _arr[_idx].agriAssetId;
+                        allOrders.push(_jsn);
+                    })(each, orders);
+                }
+                res.send({'result': 'success', 'orders': allOrders});
+            }).catch((error)=>{
+                console.log('error while query : ', error)
+                res.send({'result': 'failed', 'error': 'query not found: '+error.message});
+            })
+
+        }).catch((error)=>{
+            console.log('Business Network Count not be connected: ', error)
+            res.send({'result': 'failed', 'error': 'business network can not be connected: '+error.message});
+        })
+    }).catch((error) => {console.log('create bnd from archive failed ', error);
+        res.send({'result': 'failed', 'error': 'create bnd from archive: '+error.message});
+    });
+};
+
+
+exports.orderAction = function (req, res, next) {
+    let method = 'orderAction';
+    console.log(method+' req.body.participant is: '+req.body.email );
+    
+    
+    let businessNetworkConnection;
+    let updateOrder;
+
+    businessNetworkConnection = new BusinessNetworkConnection();
+    
+    return businessNetworkConnection.connect(req.body.email)
+    .then(() => {
+        return businessNetworkConnection.getAssetRegistry(NS+'.Orders')
+        .then((assetRegistry) => {
+            return assetRegistry.get(req.body.orderid)
+            .then((order) => {
+
+                let factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+
+                console.log("Order Processing.. Please Wait..")
+
+                updateOrder = order;
+                
+                if(req.body.registry == 'Producer'){
+                    updateOrder.deliveryDate = req.body.deliveryDate;
+                    updateOrder.status = req.body.status;
+                
+                    return businessNetworkConnection.getAssetRegistry(NS+'.Orders')
+                    .then((assetRegistry) => {
+                        return assetRegistry.update(updateOrder)
+                        .then(()=>{
+                            console.log("Order Updated");
+                            res.send({'result': 'success'});
+                        })
+                    })
+                }
+
+                if(req.body.registry == 'Distributor'){
+                    if(req.body.status == 'RECEIVED' && updateOrder.status == 'APPROVED'){
+                        // Get The Order detail
+
+                        let accountHashFrom = req.body.accountHashFrom;
+                        let privateKeyHashFrom = req.body.privateKeyHashFrom;
+                        let accountHastTo = req.body.accountHastTo;
+                        let unitPrice;
+                        let YieldBalance;
+                        let payableAmount;
+                        let txHash;
+                        let asset;
+
+                        return businessNetworkConnection.getParticipantRegistry(NS + '.Producer')
+                        .then((participantRegistry)=>{
+                            return participantRegistry.get(updateOrder.producer.$identifier)
+                            .then((_res) => { 
+                                
+
+                                accountHastTo = _res.accountHash;
+
+                                return businessNetworkConnection.getParticipantRegistry(NS + '.Distributor')
+                                .then((participantRegistry)=>{
+                                    return participantRegistry.get(updateOrder.distributor.$identifier)
+                                    .then((_res) => { 
+
+                                        accountHashFrom = _res.accountHash;
+                                        privateKeyHashFrom = _res.privateKeyHash;
+
+                                        console.log("To", accountHastTo);
+                                        console.log("From", accountHashFrom);
+                                        console.log(privateKeyHashFrom);
+
+                                        let archiveFile = fs.readFileSync(path.join(path.dirname(require.main.filename),'network','dist','agrichain-network.bna'));
+                                        //let businessNetworkConnection = new BusinessNetworkConnection();
+                                        return BusinessNetworkDefinition.fromArchive(archiveFile)
+                                        .then((bnd) => {
+                                            //serializer = bnd.getSerializer();
+
+                                            //console.log(method+' req.body.email is: '+req.body.email );
+                                            return businessNetworkConnection.connect(updateOrder.distributor.$identifier)
+                                            .then(() => {
+                                                
+                                                return businessNetworkConnection.query('selectAssetsById', {aid:updateOrder.AssetId} )
+                                                .then((orders) => {
+                                                    
+                                                    for (let each in orders)
+                                                        { (function (_idx, _arr){   
+                                                            asset = _arr[_idx];
+                                                            unitPrice = _arr[_idx].unitPrice;
+                                                            YieldBalance = _arr[_idx].YieldBalance;
+                                                        })(each, orders);
+                                                    }
+
+                                                    payableAmount = parseFloat(unitPrice) * parseFloat(updateOrder.quantity);
+                                                   
+                                                    console.log(asset.YieldBalance);
+
+                                                    web3.eth.getBalance(accountHashFrom, (err, res) => {
+                                                        
+                                                        if(err === null){
+                                                            payableAmount = parseFloat(unitPrice) * parseFloat(updateOrder.quantity);
+                                                            //console.log(parseFloat(web3.utils.fromWei(res, 'ether')) < payableAmount)
+                                                            console.log('Ether Balance Available: ', web3.utils.fromWei(res, 'ether'))
+                                                            console.log("Ether payable:", "(" + unitPrice + " X " + updateOrder.quantity + ")", payableAmount)
+
+                                                            if(parseFloat(web3.utils.fromWei(res, 'ether')) > payableAmount){
+                                                                
+                                                                const privateKey = Buffer.from(privateKeyHashFrom.substr(2), 'hex');
+                                                                
+                                                                web3.eth.getTransactionCount(accountHashFrom, (err, txCount) => {
+                                                                    const txObject = {
+                                                                        nonce: web3.utils.toHex(txCount),
+                                                                        to: accountHastTo,
+                                                                        value: web3.utils.toHex(web3.utils.toWei(payableAmount.toString(), 'ether')),
+                                                                        gasLimit: web3.utils.toHex(21000),
+                                                                        gasPrice: web3.utils.toHex(web3.utils.toWei('10', 'gwei'))
+                                                                    }
+                                                                    
+                                                                    const tx = new Tx(txObject);
+                                                                    tx.sign(privateKey);
+                                    
+                                                                    const serializedTransaction = tx.serialize();
+                                                                    const raw = '0x' + serializedTransaction.toString('hex');
+                                    
+                                                                    web3.eth.sendSignedTransaction(raw, (err, _txHash) => {
+                                                                        txHash = _txHash;
+                                                                        console.log('txHash:', txHash);
+
+                                                                        asset.YieldBalance = ( parseInt(asset.YieldBalance) - parseInt(updateOrder.quantity) ).toString();
+
+                                                                        var data = {}
+                                                                        data.orderid = updateOrder.OrderId;
+                                                                        data.email = updateOrder.distributor.$identifier;
+                                                                        data.quantity = updateOrder.quantity;
+                                                                        data.txHash = txHash;
+                                                                        data.paid = payableAmount;
+
+                                                                        if (asset.distributor) {
+                                                                            asset.distributor.push(JSON.stringify(data));
+                                                                        } else {
+                                                                            asset.distributor = [JSON.stringify(data)];
+                                                                        }
+
+                                                                        return businessNetworkConnection.getAssetRegistry(NS+'.AgriAsset')
+                                                                        .then((assetRegistry) => {
+                                                                            return assetRegistry.update(asset)
+                                                                            .then(()=>{
+                                                                                console.log("Asset updated");
+
+                                                                                updateOrder.status = req.body.status;
+
+                                                                                return businessNetworkConnection.getAssetRegistry(NS+'.Orders')
+                                                                                .then((assetRegistry) => {
+                                                                                    return assetRegistry.update(updateOrder)
+                                                                                    .then(()=>{
+                                                                                        console.log("Order Updated");
+                                                                                        //res.send({'result': 'success'});
+                                                                                    })
+                                                                                })
+                                                                                
+                                                                            })
+                                                                        })
+                                                                        
+                                                                    })
+
+                                                                })
+                                    
+                                                            }else{
+                                                                console.log('Insufficient account balance.');
+                                                            }
+
+                                                        }else{
+                                                            console.log('Error ether balance check');
+                                                        }
+                                                        
+                                                    });
+
+                                                })
+                                                .catch((error) => {console.log('selectOrders failed ', error);
+                                                    res.send({'result': 'failed', 'error': 'selectOrders: '+error.message});
+                                                });
+                                            })
+                                            .catch((error) => {console.log('businessNetwork connect failed ', error);
+                                                res.send({'result': 'failed', 'error': 'businessNetwork: '+error.message});
+                                            });
+                                        })
+                                        .catch((error) => {console.log('create bnd from archive failed ', error);
+                                            res.send({'result': 'failed', 'error': 'create bnd from archive: '+error.message});
+                                        });
+
+                                        // GEt the Asset Details
+
+                                    }).catch((error) => {
+                                        console.log('error with Distributor Account details.', error);
+                                        res.send({'result': 'failed '+error.message, 'members': []});
+                                    });
+                                }).catch((error) => {
+                                    console.log('error with Distributor Account details.', error);
+                                    res.send({'result': 'failed '+error.message, 'members': []});
+                                });
+
+                            }).catch((error) => {
+                                console.log('error with Producer Account details.', error);
+                                res.send({'result': 'failed '+error.message, 'members': []});
+                            });
+                        })
+                        .catch((error) => {
+                            console.log('error with Producer Account details.', error);
+                            res.send({'result': 'failed '+error.message, 'members': []});
+                        });
+
+                    }
+                }
+
+                updateOrder.status = req.body.status;
+                
+                /*return businessNetworkConnection.getAssetRegistry(NS+'.Orders')
+                .then((assetRegistry) => {
+                    return assetRegistry.update(updateOrder)
+                    .then(()=>{
+                        console.log("Order Updated");
+                        res.send({'result': 'success'});
+                    })
+                })*/
+
+            })
+            .catch((error) => {
+                console.log('Registry Get Order failed: '+error.message);
+                res.send({'result': 'failed', 'error': 'Registry Get Order failed: '+error.message});
+            });
+        })
+        .catch((error) => {console.log('Get Asset Registry failed: '+error.message);
+            res.send({'result': 'failed', 'error': 'Get Asset Registry failed: '+error.message});
+        });
+    })
+    .catch((error) => {console.log('Business Network Connect failed: '+error.message);
+        res.send({'result': 'failed', 'error': 'Get Asset Registry failed: '+error.message});
+    });
+};
+
+
+
+
 
 /**
  * adds an asset to the blockchain
@@ -273,7 +611,7 @@ exports.addAssets = function (req, res, next) {
         order.TotalProductCost = req.body.TotalProductCost;
         order.producer = factory.newRelationship(NS, 'Producer', req.body.producer);
         //order.distributor = factory.newRelationship(NS, 'Distributor', req.body.distributor);
-        order.unitCount = req.body.unitCount;
+        //order.unitCount = req.body.unitCount;
 
         
         const createNew = factory.newTransaction(NS, 'CreateAssets');
@@ -386,7 +724,8 @@ exports.assetsAction = function (req, res, next) {
                                 const serializedTransaction = tx.serialize();
                                 const raw = '0x' + serializedTransaction.toString('hex');
 
-                                web3.eth.sendSignedTransaction(raw, (err, txHash) => {
+                                web3.eth.sendSignedTransaction(raw, (err, _txHash) => {
+                                    let txHash = _txHash;
                                     console.log('txHash:', txHash);
 
                                     updateOrder = order;
@@ -483,6 +822,8 @@ exports.getMembers = function(req, res, next) {
                             { let _jsn = {};
                             _jsn.type = req.body.registry;
                             _jsn.fullname = _arr[_idx].fullname;
+                            _jsn.accountHash = _arr[_idx].accountHash;
+                            //_jsn.privateKeyHash = _arr[_idx].privateKeyHash;
                             //console.log(_arr[_idx].email, _arr[_idx].fullname, req.body.registry)
                             switch (req.body.registry)
                             {
@@ -559,7 +900,7 @@ exports.SignIn = function(req, res, next) {
                 Members.password = _res.password;
                 Members.accountBalance = _res.accountBalance;
                 Members.accountHash = _res.accountHash;
-                Members.privateKeyHash = _res.privateKeyHash;
+                //Members.privateKeyHash = _res.privateKeyHash;
                 Members.SubCategory = res.SubCategory;
                 Members.Locale = res.Locale;
                 Members.UserRole = res.UserRole;
@@ -581,7 +922,7 @@ exports.SignIn = function(req, res, next) {
                         Members.password = _res.password;
                         Members.accountBalance = _res.accountBalance;
                         Members.accountHash = _res.accountHash;
-                        Members.privateKeyHash = _res.privateKeyHash;
+                        //Members.privateKeyHash = _res.privateKeyHash;
                         Members.SubCategory = res.SubCategory;
                         Members.Locale = res.Locale;
                         Members.UserRole = res.UserRole;
@@ -604,7 +945,7 @@ exports.SignIn = function(req, res, next) {
                                 Members.password = _res.password;
                                 Members.accountBalance = _res.accountBalance;
                                 Members.accountHash = _res.accountHash;
-                                Members.privateKeyHash = _res.privateKeyHash;
+                                //Members.privateKeyHash = _res.privateKeyHash;
                                 Members.SubCategory = res.SubCategory;
                                 Members.Locale = res.Locale;
                                 Members.UserRole = res.UserRole;
