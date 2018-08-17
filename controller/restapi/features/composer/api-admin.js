@@ -234,7 +234,7 @@ exports.addOrders = function(req, res, next){
     let businessNetworkConnection;
     let factory;
     let ts = Date.now();
-    let OrderId = req.body.producer.replace(/@/, '').replace(/\./, '')+ts;
+    let OrderId = req.body.OrderId; //req.body.producer.replace(/@/, '').replace(/\./, '')+ts;
     //if (svc.m_connection === null) {svc.createMessageSocket();}
     businessNetworkConnection = new BusinessNetworkConnection();
     return businessNetworkConnection.connect(req.body.producer)
@@ -584,7 +584,7 @@ exports.addAssets = function (req, res, next) {
     let businessNetworkConnection;
     let factory;
     let ts = Date.now();
-    let agriAssetId = req.body.producer.replace(/@/, '').replace(/\./, '')+ts;
+    let agriAssetId = req.body.AssetId;//req.body.producer.replace(/@/, '').replace(/\./, '')+ts;
     //if (svc.m_connection === null) {svc.createMessageSocket();}
     businessNetworkConnection = new BusinessNetworkConnection();
     return businessNetworkConnection.connect(req.body.producer)
